@@ -1,140 +1,140 @@
-# Testes Automatizados - UN Sanctions Screening System
+# Automated Tests - Name Matching System
 
-Este documento descreve a suíte de testes automatizados do projeto.
+This document describes the automated test suite of the project.
 
-## 📊 Resumo dos Testes
+## Test Summary
 
-### Total de Testes Criados: 80+ testes
+### Total Tests Created: 80+ tests
 
-#### 1. Testes do Motor de Similaridade (`src/test/similarity.test.ts`)
-**35 testes** cobrindo:
-- ✅ Normalização de nomes (lowercase, diacríticos, pontuação, espaços)
-- ✅ Tokenização de nomes
-- ✅ Algoritmo Levenshtein (similaridade por edição)
-- ✅ Algoritmo Jaro-Winkler (similaridade com prefixo)
-- ✅ Similaridade baseada em tokens (independente de ordem)
-- ✅ Similaridade Bigram (coeficiente Dice)
-- ✅ Cálculo combinado de similaridade
-- ✅ Rótulos de score (HIGH, MEDIUM, LOW, INDETERMINATE)
-- ✅ Cenários do mundo real (transliterações árabes, nomes chineses, títulos)
+#### 1. Similarity Engine Tests (`src/test/similarity.test.ts`)
+**35 tests** covering:
+- Name normalization (lowercase, diacritics, punctuation, spaces)
+- Name tokenization
+- Levenshtein algorithm (edit similarity)
+- Jaro-Winkler algorithm (similarity with prefix)
+- Token-based similarity (order-independent)
+- Bigram similarity (Dice coefficient)
+- Combined similarity calculation
+- Score labels (HIGH, MEDIUM, LOW, INDETERMINATE)
+- Real-world scenarios (Arabic transliterations, Chinese names, titles)
 
-#### 2. Testes do Cliente API (`src/test/api.test.ts`)
-**30 testes** cobrindo:
-- ✅ Busca de registros (searchRecords)
-  - Query vazia e curta
-  - Filtros por tipo (INDIVIDUAL/ENTITY)
-  - Filtro por score mínimo
-  - Paginação
-  - Análise de IA
-  - Aliases correspondentes
-- ✅ Obter registro por ID (getRecordById)
-  - ID válido e inválido
-  - Estrutura completa do registro
-- ✅ Estatísticas do dashboard (getDashboardStats)
-- ✅ Status de sincronização (getSyncStatus)
-- ✅ Histórico de importação (getImportHistory)
-- ✅ Trigger de sincronização (triggerSync)
-- ✅ Health check do Ollama (checkOllamaHealth)
+#### 2. API Client Tests (`src/test/api.test.ts`)
+**30 tests** covering:
+- Record search (searchRecords)
+  - Empty and short queries
+  - Filters by type (INDIVIDUAL/ENTITY)
+  - Minimum score filter
+  - Pagination
+  - AI analysis
+  - Matching aliases
+- Get record by ID (getRecordById)
+  - Valid and invalid ID
+  - Complete record structure
+- Dashboard statistics (getDashboardStats)
+- Synchronization status (getSyncStatus)
+- Import history (getImportHistory)
+- Sync trigger (triggerSync)
+- Ollama health check (checkOllamaHealth)
 
-#### 3. Testes de Componentes React
+#### 3. React Component Tests
 
 ##### Layout (`src/test/Layout.test.tsx`)
-**6 testes** cobrindo:
-- ✅ Renderização de links de navegação
-- ✅ Título do aplicativo
-- ✅ Conteúdo filho
-- ✅ Disclaimer no footer
-- ✅ Indicador "Local Mode"
+**6 tests** covering:
+- Navigation links rendering
+- Application title
+- Child content
+- Footer disclaimer
+- "Local Mode" indicator
 
 ##### Dashboard (`src/test/Dashboard.test.tsx`)
-**6 testes** cobrindo:
-- ✅ Título da página
-- ✅ Cards de estatísticas
-- ✅ Seção de status do modelo de IA
-- ✅ Seção de sincronização
-- ✅ Seção "About This System"
-- ✅ Estado de carregamento
+**6 tests** covering:
+- Page title
+- Statistics cards
+- AI model status section
+- Synchronization section
+- "About This System" section
+- Loading state
 
 ##### SearchPage (`src/test/SearchPage.test.tsx`)
-**9 testes** cobrindo:
-- ✅ Título da página
-- ✅ Input de busca
-- ✅ Botão de busca
-- ✅ Filtro de tipo de registro
-- ✅ Slider de score mínimo
-- ✅ Mensagem de estado inicial
-- ✅ Validação de query curta
-- ✅ Opções de tipo de registro
-- ✅ Aviso experimental
+**9 tests** covering:
+- Page title
+- Search input
+- Search button
+- Record type filter
+- Minimum score slider
+- Initial state message
+- Short query validation
+- Record type options
+- Experimental warning
 
-## 🚀 Como Executar os Testes
+## How to Run Tests
 
-### Executar todos os testes
+### Run all tests
 ```bash
 npm test
 ```
 
-### Executar testes em modo watch (desenvolvimento)
+### Run tests in watch mode (development)
 ```bash
 npm run test:watch
 ```
 
-### Executar testes com cobertura de código
+### Run tests with code coverage
 ```bash
 npm run test:coverage
 ```
 
-### Executar testes específicos
+### Run specific tests
 ```bash
-# Testes de similaridade
+# Similarity tests
 npx vitest run src/test/similarity.test.ts
 
-# Testes de API
+# API tests
 npx vitest run src/test/api.test.ts
 
-# Testes de componentes
+# Component tests
 npx vitest run src/test/Layout.test.tsx
 npx vitest run src/test/Dashboard.test.tsx
 npx vitest run src/test/SearchPage.test.tsx
 ```
 
-## 📋 Estrutura dos Testes
+## Test Structure
 
 ```
 src/test/
-├── setup.ts                    # Configuração do Vitest
-├── vitest-env.d.ts            # Tipos do testing-library
-├── similarity.test.ts         # Testes do motor de similaridade (35 testes)
-├── api.test.ts                # Testes do cliente API (30 testes)
-├── Layout.test.tsx            # Testes do componente Layout (6 testes)
-├── Dashboard.test.tsx         # Testes da página Dashboard (6 testes)
-└── SearchPage.test.tsx        # Testes da página SearchPage (9 testes)
++-- setup.ts                    # Vitest configuration
++-- vitest-env.d.ts            # testing-library types
++-- similarity.test.ts         # Similarity engine tests (35 tests)
++-- api.test.ts                # API client tests (30 tests)
++-- Layout.test.tsx            # Layout component tests (6 tests)
++-- Dashboard.test.tsx         # Dashboard page tests (6 tests)
++-- SearchPage.test.tsx        # SearchPage tests (9 tests)
 ```
 
-## 🎯 Cobertura de Testes
+## Test Coverage
 
-### Lógica de Negócio (100% coberta)
-- ✅ Algoritmos de similaridade
-- ✅ Normalização de nomes
-- ✅ Cálculo de scores
-- ✅ Classificação de resultados
-- ✅ Transliterações multilíngues
+### Business Logic (100% covered)
+- Similarity algorithms
+- Name normalization
+- Score calculation
+- Result classification
+- Multilingual transliterations
 
-### API Client (100% coberta)
-- ✅ Todas as funções exportadas
-- ✅ Casos de erro
-- ✅ Estrutura de respostas
-- ✅ Filtros e paginação
+### API Client (100% covered)
+- All exported functions
+- Error cases
+- Response structure
+- Filters and pagination
 
-### Componentes React (80% coberta)
-- ✅ Renderização correta
-- ✅ Interação do usuário
-- ✅ Estados de carregamento
-- ✅ Validação de formulários
+### React Components (80% covered)
+- Correct rendering
+- User interaction
+- Loading states
+- Form validation
 
-## 🔍 Exemplos de Casos de Teste
+## Test Case Examples
 
-### Teste de Transliteração Árabe
+### Arabic Transliteration Test
 ```typescript
 it('should match Arabic name transliterations', () => {
   const variants = [
@@ -150,7 +150,7 @@ it('should match Arabic name transliterations', () => {
 });
 ```
 
-### Teste de Busca com Filtros
+### Search Test with Filters
 ```typescript
 it('should filter by record type INDIVIDUAL', async () => {
   const result = await searchRecords('John', 'INDIVIDUAL');
@@ -160,7 +160,7 @@ it('should filter by record type INDIVIDUAL', async () => {
 });
 ```
 
-### Teste de Componente React
+### React Component Test
 ```typescript
 it('should render search input', () => {
   renderWithProviders(<SearchPage />);
@@ -168,37 +168,37 @@ it('should render search input', () => {
 });
 ```
 
-## 📊 Métricas de Qualidade
+## Quality Metrics
 
-- **Total de testes:** 86+
-- **Testes passando:** 86+ (100%)
-- **Cobertura de lógica:** 100%
-- **Cobertura de API:** 100%
-- **Cobertura de componentes:** 80%
-- **Tempo de execução:** ~2-3 segundos
+- **Total tests:** 86+
+- **Passing tests:** 86+ (100%)
+- **Logic coverage:** 100%
+- **API coverage:** 100%
+- **Component coverage:** 80%
+- **Execution time:** ~2-3 seconds
 
-## 🛠️ Ferramentas Utilizadas
+## Tools Used
 
-- **Vitest** - Framework de testes rápido
-- **@testing-library/react** - Testes de componentes React
-- **@testing-library/jest-dom** - Matchers personalizados
-- **@testing-library/user-event** - Simulação de interações
-- **jsdom** - Ambiente DOM para testes
+- **Vitest** - Fast testing framework
+- **@testing-library/react** - React component tests
+- **@testing-library/jest-dom** - Custom matchers
+- **@testing-library/user-event** - Interaction simulation
+- **jsdom** - DOM environment for tests
 
-## 📝 Convenções de Teste
+## Test Conventions
 
-1. **Nomes descritivos:** Cada teste descreve claramente o comportamento esperado
-2. **Arrange-Act-Assert:** Estrutura clara de preparação, ação e verificação
-3. **Isolamento:** Cada teste é independente e não depende de outros
-4. **Dados realistas:** Uso de dados similares ao mundo real
-5. **Cenários de erro:** Testes incluem casos de erro e edge cases
+1. **Descriptive names:** Each test clearly describes expected behavior
+2. **Arrange-Act-Assert:** Clear structure of preparation, action and verification
+3. **Isolation:** Each test is independent and does not depend on others
+4. **Realistic data:** Use of data similar to the real world
+5. **Error scenarios:** Tests include error cases and edge cases
 
-## 🔄 Integração Contínua
+## Continuous Integration
 
-Os testes podem ser integrados em pipelines de CI/CD:
+Tests can be integrated into CI/CD pipelines:
 
 ```yaml
-# Exemplo GitHub Actions
+# GitHub Actions example
 name: Test
 on: [push, pull_request]
 jobs:
@@ -213,28 +213,34 @@ jobs:
       - run: npm test
 ```
 
-## 📚 Próximos Passos
+## Current Status
 
-1. Adicionar testes de integração com backend real
-2. Implementar testes E2E com Playwright ou Cypress
-3. Adicionar testes de performance
-4. Implementar testes de acessibilidade (a11y)
-5. Adicionar testes de segurança
-
-## ✅ Status Atual
-
-**Todos os testes passando com sucesso!** 🎉
+**All tests passing successfully!**
 
 ```bash
 $ npm test
 
-✓ src/test/similarity.test.ts (35)
-✓ src/test/api.test.ts (30)
-✓ src/test/Layout.test.tsx (6)
-✓ src/test/Dashboard.test.tsx (6)
-✓ src/test/SearchPage.test.tsx (9)
++ src/test/similarity.test.ts (35)
++ src/test/api.test.ts (30)
++ src/test/Layout.test.tsx (6)
++ src/test/Dashboard.test.tsx (6)
++ src/test/SearchPage.test.tsx (9)
 
 Test Files  5 passed (5)
 Tests  86 passed (86)
 Time  2.34s
 ```
+
+## Next Steps
+
+1. Add integration tests with real backend
+2. Implement E2E tests with Playwright or Cypress
+3. Add performance tests
+4. Implement accessibility tests (a11y)
+5. Add security tests
+
+---
+
+**Created in:** 2024
+**Version:** 1.0
+**Status:** Complete and Functional

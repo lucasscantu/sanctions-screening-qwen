@@ -1,69 +1,69 @@
-# 🔧 Solução de Problemas Docker
+# Troubleshooting Docker
 
-## ❌ Erro: "unable to prepare context: unable to evaluate symlinks in Dockerfile path"
+## Error: "unable to prepare context: unable to evaluate symlinks in Dockerfile path"
 
-### Problema
-Você está executando `docker-compose up -d` mas o Docker não encontra o Dockerfile.
+### Problem
+You are running `docker-compose up -d` but Docker cannot find the Dockerfile.
 
-### Solução
+### Solution
 
-O projeto agora tem arquivos Docker na **raiz do projeto**:
+The project now has Docker files at the **project root**:
 
 ```
-UN-Sanctions-Screening-System/
-├── docker-compose.yml      ← NOVO (na raiz)
-├── Dockerfile              ← NOVO (na raiz)
-├── nginx.conf              ← NOVO (na raiz)
-└── .dockerignore           ← NOVO (na raiz)
+name-matching-system/
++-- docker-compose.yml      (at root)
++-- Dockerfile              (at root)
++-- nginx.conf              (at root)
++-- .dockerignore           (at root)
 ```
 
-### ✅ Passos para Resolver
+### Steps to Resolve
 
-#### 1. Navegue para a raiz do projeto
+#### 1. Navigate to project root
 ```bash
-cd /home/lucas/Documentos/Projetos/UN-Sanctions-Screening-System
+cd /path/to/name-matching-system
 ```
 
-#### 2. Execute o docker-compose
+#### 2. Run docker-compose
 ```bash
 docker-compose up -d
 ```
 
-#### 3. Verifique se está rodando
+#### 3. Verify it is running
 ```bash
 docker-compose ps
 ```
 
-#### 4. Acesse no navegador
+#### 4. Access in browser
 ```
 http://localhost:3000
 ```
 
 ---
 
-## 📋 Comandos Docker Completos
+## Complete Docker Commands
 
-### Iniciar
+### Start
 ```bash
 docker-compose up -d
 ```
 
-### Ver logs
+### View logs
 ```bash
 docker-compose logs -f
 ```
 
-### Parar
+### Stop
 ```bash
 docker-compose down
 ```
 
-### Reconstruir (após mudanças no código)
+### Rebuild (after code changes)
 ```bash
 docker-compose up -d --build
 ```
 
-### Limpar tudo
+### Clean everything
 ```bash
 docker-compose down -v
 docker system prune -a
@@ -71,29 +71,29 @@ docker system prune -a
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
-### Erro: "Port 3000 already in use"
+### Error: "Port 3000 already in use"
 
-**Solução 1:** Use outra porta
+**Solution 1:** Use another port
 ```bash
-# Edite docker-compose.yml
+# Edit docker-compose.yml
 ports:
-  - "8080:80"  # Mude para 8080 ou outra porta livre
+  - "8080:80"  # Change to 8080 or another free port
 ```
 
-**Solução 2:** Mate o processo na porta 3000
+**Solution 2:** Kill the process on port 3000
 ```bash
-# Encontrar o processo
+# Find the process
 lsof -i :3000
 
-# Matar o processo (substitua PID)
+# Kill the process (replace PID)
 kill -9 <PID>
 ```
 
-### Erro: "Cannot connect to the Docker daemon"
+### Error: "Cannot connect to the Docker daemon"
 
-**Solução:** Inicie o Docker
+**Solution:** Start Docker
 ```bash
 # Linux
 sudo systemctl start docker
@@ -102,56 +102,56 @@ sudo systemctl start docker
 open -a Docker
 
 # Windows
-# Inicie o Docker Desktop
+# Start Docker Desktop
 ```
 
-### Erro: "buildx Docker CLI plugin not found"
+### Error: "buildx Docker CLI plugin not found"
 
-**Solução:** Use o builder clássico
+**Solution:** Use classic builder
 ```bash
-# Edite docker-compose.yml e remova qualquer referência a buildx
-# Ou use:
+# Edit docker-compose.yml and remove any buildx references
+# Or use:
 DOCKER_BUILDKIT=0 docker-compose up -d --build
 ```
 
-### Erro: "The attribute `version` is obsolete"
+### Error: "The attribute `version` is obsolete"
 
-**Solução:** Este é apenas um aviso, não um erro. O docker-compose funciona normalmente.
+**Solution:** This is just a warning, not an error. The docker-compose works normally.
 
-Para remover o aviso, o `docker-compose.yml` já foi atualizado sem o atributo `version`.
+To remove the warning, the `docker-compose.yml` has already been updated without the `version` attribute.
 
 ---
 
-## 🔄 Alternativa: Executar sem Docker
+## Alternative: Run without Docker
 
-Se preferir não usar Docker:
+If you prefer not to use Docker:
 
 ```bash
-# 1. Instalar dependências
+# 1. Install dependencies
 npm install
 
-# 2. Executar em modo desenvolvimento
+# 2. Run in development mode
 npm run dev
 
-# 3. Acessar
+# 3. Access
 # http://localhost:3000
 ```
 
 ---
 
-## 📊 Verificar Status
+## Check Status
 
-### Containers rodando
+### Running containers
 ```bash
 docker-compose ps
 ```
 
-### Uso de recursos
+### Resource usage
 ```bash
 docker stats
 ```
 
-### Logs em tempo real
+### Real-time logs
 ```bash
 docker-compose logs -f frontend
 ```
@@ -163,67 +163,67 @@ curl http://localhost:3000/health
 
 ---
 
-## 🗑️ Limpeza Completa
+## Complete Cleanup
 
 ```bash
-# Parar containers
+# Stop containers
 docker-compose down
 
-# Remover volumes
+# Remove volumes
 docker-compose down -v
 
-# Remover imagens
-docker rmi $(docker images -q sanctions-frontend)
+# Remove images
+docker rmi $(docker images -q frontend)
 
-# Limpar cache do Docker
+# Clear Docker cache
 docker system prune -a
 ```
 
 ---
 
-## ✅ Verificação Final
+## Final Verification
 
-Após executar `docker-compose up -d`, verifique:
+After running `docker-compose up -d`, verify:
 
 ```bash
-# 1. Container está rodando
+# 1. Container is running
 docker-compose ps
-# Deve mostrar "Up" e "healthy"
+# Should show "Up" and "healthy"
 
-# 2. Porta está listening
+# 2. Port is listening
 netstat -tlnp | grep 3000
-# Ou
+# Or
 lsof -i :3000
 
-# 3. Aplicação responde
+# 3. Application responds
 curl http://localhost:3000
-# Deve retornar HTML
+# Should return HTML
 
 # 4. Health check
 curl http://localhost:3000/health
-# Deve retornar "healthy"
+# Should return "healthy"
 ```
 
 ---
 
-## 📞 Ainda com problemas?
+## Still having problems?
 
-1. **Verifique os logs:**
+1. **Check logs:**
    ```bash
    docker-compose logs frontend
    ```
 
-2. **Reconstrua do zero:**
+2. **Rebuild from scratch:**
    ```bash
    docker-compose down -v
    docker system prune -a
    docker-compose up -d --build
    ```
 
-3. **Consulte a documentação:**
-   - [DOCKER.md](./DOCKER.md) - Guia completo Docker
-   - [QUICKSTART.md](./QUICKSTART.md) - Guia rápido
+3. **Consult documentation:**
+   - [DOCKER.md](./DOCKER.md) - Complete Docker guide
+   - [QUICKSTART.md](./QUICKSTART.md) - Quick start guide
 
 ---
 
-**Pronto!** Agora você pode executar o projeto com Docker sem problemas. 🎉
+**Ready!** Now you can run the project with Docker without issues.
