@@ -23,9 +23,11 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('Dashboard', () => {
-  it('should render dashboard title', () => {
+  it('should render dashboard title', async () => {
     renderWithProviders(<Dashboard />);
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    });
   });
 
   it('should display statistics cards', async () => {

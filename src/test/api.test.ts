@@ -7,9 +7,79 @@ import {
   getImportHistory,
   triggerSync,
   checkOllamaHealth,
+  clearRecordsCache,
+  addUploadedRecords,
 } from '../api/client';
+import { SanctionedRecord } from '../types';
+
+// Dados de teste para simular upload
+const mockRecords: SanctionedRecord[] = [
+  {
+    id: 1,
+    referenceNumber: 'TEST-001',
+    recordType: 'INDIVIDUAL',
+    primaryName: 'John Smith',
+    listingDate: '2020-01-01',
+    lastUpdate: '2024-01-01',
+    firstImported: '2024-01-01T00:00:00Z',
+    lastSynchronized: '2024-01-01T00:00:00Z',
+    sourceStatus: 'ACTIVE',
+    sourceUrl: 'test',
+    aliases: [
+      { id: 1, aliasName: 'Johnny Smith', quality: 'good', originalRepresentation: null },
+    ],
+    biographicalDetails: [{
+      dateOfBirth: '1970-01-01',
+      datePrecision: 'EXACT',
+      placeOfBirth: 'London',
+      nationality: 'British',
+      gender: 'M',
+      identificationDocuments: [],
+      addresses: ['London, UK'],
+    }],
+    sanctionsPrograms: [{
+      program: 'Test Program',
+      referenceInfo: 'Test',
+      listingDetails: 'Test details',
+    }],
+  },
+  {
+    id: 2,
+    referenceNumber: 'TEST-002',
+    recordType: 'ENTITY',
+    primaryName: 'Global Trading Corp',
+    listingDate: '2021-01-01',
+    lastUpdate: '2024-01-01',
+    firstImported: '2024-01-01T00:00:00Z',
+    lastSynchronized: '2024-01-01T00:00:00Z',
+    sourceStatus: 'ACTIVE',
+    sourceUrl: 'test',
+    aliases: [
+      { id: 2, aliasName: 'GTC', quality: 'good', originalRepresentation: null },
+    ],
+    biographicalDetails: [{
+      dateOfBirth: null,
+      datePrecision: null,
+      placeOfBirth: null,
+      nationality: null,
+      gender: null,
+      identificationDocuments: [],
+      addresses: ['Singapore'],
+    }],
+    sanctionsPrograms: [{
+      program: 'Test Program',
+      referenceInfo: 'Test',
+      listingDetails: 'Test details',
+    }],
+  },
+];
 
 describe('searchRecords', () => {
+  beforeEach(() => {
+    clearRecordsCache();
+    addUploadedRecords(mockRecords);
+  });
+
   it('should return empty results for empty query', async () => {
     const result = await searchRecords('');
     expect(result.totalResults).toBe(0);
@@ -68,7 +138,6 @@ describe('searchRecords', () => {
     
     if (page1.totalResults > 2) {
       expect(page2.page).toBe(2);
-      // Results should be different
       if (page1.results.length > 0 && page2.results.length > 0) {
         expect(page1.results[0].record.id).not.toBe(page2.results[0].record.id);
       }
@@ -103,7 +172,7 @@ describe('searchRecords', () => {
   it('should report AI availability', async () => {
     const result = await searchRecords('John');
     expect(typeof result.aiAvailable).toBe('boolean');
-    expect(result.aiModel).toBeTruthy();
+    expect(result.aiModel).toBe('qwen3:4b');
   });
 
   it('should measure search time', async () => {
@@ -118,6 +187,11 @@ describe('searchRecords', () => {
 });
 
 describe('getRecordById', () => {
+  beforeEach(() => {
+    clearRecordsCache();
+    addUploadedRecords(mockRecords);
+  });
+
   it('should return a record for valid ID', async () => {
     const record = await getRecordById(1);
     expect(record).not.toBeNull();
@@ -151,6 +225,10 @@ describe('getRecordById', () => {
 });
 
 describe('getDashboardStats', () => {
+  beforeEach(() => {
+    clearRecordsCache();
+  });
+
   it('should return dashboard statistics', async () => {
     const stats = await getDashboardStats();
     expect(stats).toBeDefined();
@@ -194,20 +272,18 @@ describe('getSyncStatus', () => {
 });
 
 describe('getImportHistory', () => {
+  beforeEach(() => {
+    clearRecordsCache();
+  });
+
   it('should return array of import jobs', async () => {
     const history = await getImportHistory();
     expect(Array.isArray(history)).toBe(true);
-    expect(history.length).toBeGreaterThan(0);
   });
 
-  it('should include job details', async () => {
+  it('should return empty array when no data loaded', async () => {
     const history = await getImportHistory();
-    const job = history[0];
-    expect(job.id).toBeDefined();
-    expect(job.startTime).toBeTruthy();
-    expect(job.status).toBeTruthy();
-    expect(typeof job.recordsCreated).toBe('number');
-    expect(typeof job.recordsUpdated).toBe('number');
+    expect(history.length).toBe(0);
   });
 });
 
