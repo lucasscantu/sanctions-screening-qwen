@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: sanctions-screening
+  
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/sanctions_screening}
+    username: ${SPRING_DATASOURCE_USERNAME:screening_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:change_me_in_production}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+# Ollama Configuration
+ollama:
+  base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+  model: ${OLLAMA_MODEL:qwen3:4b}
+  embedding-model: ${OLLAMA_EMBEDDING_MODEL:nomic-embed-text}
+  enabled: ${OLLAMA_ENABLED:true}
+  timeout-seconds: ${OLLAMA_TIMEOUT_SECONDS:30}
+
+# UN Data Source
+un:
+  data-source-url: ${UN_DATA_SOURCE_URL:https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list}
+
+# Sync Schedule
+sync:
+  cron: ${SYNC_CRON_EXPRESSION:0 0 10 * * *}
+
+# Search Configuration
+search:
+  default-limit: ${DEFAULT_SEARCH_LIMIT:20}
+  max-limit: ${MAX_SEARCH_LIMIT:100}
+  min-score-threshold: ${MIN_SCORE_THRESHOLD:0}
+
+# Server
+server:
+  port: ${APP_PORT:8080}
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.sanctions: DEBUG
+    org.hibernate.SQL: WARN
+
+# OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
