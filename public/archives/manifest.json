@@ -1,0 +1,8 @@
+{
+  "files": [
+    "sanctions-list.xml",
+    "un-official-sample.xml"
+  ],
+  "description": "Lista de arquivos XML de sanções a serem carregados pelo sistema",
+  "lastUpdated": "2024-12-01"
+}

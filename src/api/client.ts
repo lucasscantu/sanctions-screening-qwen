@@ -1,16 +1,16 @@
 import { SearchResponse, SearchResult, SanctionedRecord, DashboardStats, SyncStatus, ImportJob } from '../types';
 import { calculateSimilarity, getScoreLabel } from '../lib/similarity';
-import { loadSanctionsXML } from '../lib/xml-parser';
+import { loadAllSanctionsXML } from '../lib/xml-parser';
 
 // Cache dos registros carregados do XML
 let cachedRecords: SanctionedRecord[] | null = null;
 
 /**
- * Carrega registros do XML (com cache)
+ * Carrega TODOS os registros dos XMLs (com cache)
  */
 async function getRecords(): Promise<SanctionedRecord[]> {
   if (!cachedRecords) {
-    cachedRecords = await loadSanctionsXML();
+    cachedRecords = await loadAllSanctionsXML();
   }
   return cachedRecords;
 }

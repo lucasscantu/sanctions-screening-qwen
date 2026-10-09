@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getDashboardStats, triggerSync, clearRecordsCache } from '../api/client';
-import { loadSanctionsXML, validateXML } from '../lib/xml-parser';
+import { validateXML, detectXMLFormat } from '../lib/xml-parser';
 import { FileText, Upload, RefreshCw, CheckCircle, AlertCircle, Database, Users, Building2 } from 'lucide-react';
 
 export function DataManager() {
@@ -193,34 +193,80 @@ export function DataManager() {
       {/* Informações */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-blue-900 mb-3">
-          📁 Sobre o Arquivo XML
+          📁 Sobre os Arquivos XML
         </h3>
         <div className="text-sm text-blue-800 space-y-2">
           <p>
-            O sistema utiliza um arquivo XML local localizado em:
+            O sistema carrega <strong>TODOS os arquivos XML</strong> da pasta:
           </p>
           <code className="block bg-blue-100 px-3 py-2 rounded text-xs font-mono">
-            /archives/sanctions-list.xml
+            /public/archives/
           </code>
           <p className="mt-3">
-            <strong>Formato esperado:</strong>
+            <strong>Formatos suportados:</strong>
           </p>
           <ul className="list-disc list-inside space-y-1 text-xs">
-            <li>Elementos <code>&lt;individual&gt;</code> para pessoas</li>
-            <li>Elementos <code>&lt;entity&gt;</code> para organizações</li>
-            <li>Campos: primaryName, alias, dateOfBirth, nationality, etc.</li>
-            <li>Atributos: id, dateListed, lastUpdate</li>
+            <li><strong>Formato Oficial ONU:</strong> Tags em MAIÚSCULAS (INDIVIDUAL, ENTITY, FIRST_NAME, etc.)</li>
+            <li><strong>Formato Simplificado:</strong> Tags em minúsculas (individual, entity, primaryName, etc.)</li>
           </ul>
+          <p className="mt-3">
+            <strong>Como adicionar mais arquivos:</strong>
+          </p>
+          <ol className="list-decimal list-inside space-y-1 text-xs ml-2">
+            <li>Coloque o arquivo XML na pasta <code>/public/archives/</code></li>
+            <li>Adicione o nome do arquivo em <code>/public/archives/manifest.json</code></li>
+            <li>Clique em "Recarregar Dados" nesta página</li>
+          </ol>
           <p className="mt-3">
             <strong>Nota:</strong> Todos os dados são processados localmente. Nenhum dado é enviado para servidores externos.
           </p>
         </div>
       </div>
 
-      {/* Exemplo de XML */}
+      {/* Exemplo de XML - Formato Oficial ONU */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-slate-900 mb-4">
-          📋 Exemplo de Estrutura XML
+          📋 Exemplo: Formato Oficial ONU
+        </h2>
+        <pre className="bg-slate-50 p-4 rounded-lg overflow-x-auto text-xs">
+{`<?xml version="1.0" encoding="UTF-8"?>
+<DATAEXPORT>
+  <INDIVIDUALS>
+    <INDIVIDUAL>
+      <DATAID>6908399</DATAID>
+      <FIRST_NAME>ABD AL-RAHMAN</FIRST_NAME>
+      <SECOND_NAME>KHALAF</SECOND_NAME>
+      <THIRD_NAME>UBAYD JUDAY</THIRD_NAME>
+      <FOURTH_NAME>AL-ANIZI</FOURTH_NAME>
+      <UN_LIST_TYPE>Al-Qaida</UN_LIST_TYPE>
+      <REFERENCE_NUMBER>QDi.335</REFERENCE_NUMBER>
+      <LISTED_ON>2014-09-23</LISTED_ON>
+      <NATIONALITY>
+        <VALUE>Kuwait</VALUE>
+      </NATIONALITY>
+      <INDIVIDUAL_ALIAS>
+        <QUALITY>Good</QUALITY>
+        <ALIAS_NAME>Abd al-Rahman Khalaf al-Anizi</ALIAS_NAME>
+      </INDIVIDUAL_ALIAS>
+      <INDIVIDUAL_DATE_OF_BIRTH>
+        <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
+        <DATE>1973-03-06</DATE>
+      </INDIVIDUAL_DATE_OF_BIRTH>
+      <INDIVIDUAL_DOCUMENT>
+        <TYPE_OF_DOCUMENT>National ID</TYPE_OF_DOCUMENT>
+        <NUMBER>273030601222</NUMBER>
+        <ISSUING_COUNTRY>Kuwait</ISSUING_COUNTRY>
+      </INDIVIDUAL_DOCUMENT>
+    </INDIVIDUAL>
+  </INDIVIDUALS>
+</DATAEXPORT>`}
+        </pre>
+      </div>
+
+      {/* Exemplo de XML - Formato Simplificado */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">
+          📋 Exemplo: Formato Simplificado
         </h2>
         <pre className="bg-slate-50 p-4 rounded-lg overflow-x-auto text-xs">
 {`<?xml version="1.0" encoding="UTF-8"?>
