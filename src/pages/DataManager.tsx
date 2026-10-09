@@ -6,15 +6,18 @@ import {
   clearRecordsCache,
   parseXMLContent,
   addUploadedRecords,
-  clearUploadedRecords
+  clearUploadedRecords,
+  fetchXMLFromURL
 } from '../api/client';
 import { validateXML, detectXMLFormat } from '../lib/xml-parser';
-import { FileText, Upload, RefreshCw, CheckCircle, AlertCircle, Database, Users, Building2, FolderOpen, AlertTriangle, Trash2 } from 'lucide-react';
+import { FileText, Upload, RefreshCw, CheckCircle, AlertCircle, Database, Users, Building2, FolderOpen, AlertTriangle, Trash2, Link as LinkIcon, Download } from 'lucide-react';
 
 export function DataManager() {
   const queryClient = useQueryClient();
   const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [xmlUrl, setXmlUrl] = useState<string>('');
+  const [isUrlLoading, setIsUrlLoading] = useState<boolean>(false);
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],
@@ -112,6 +115,55 @@ export function DataManager() {
       setUploadedFiles([]);
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       setUploadMessage({ type: 'success', text: 'Todos os dados foram limpos.' });
+    }
+  };
+
+  const handleUrlImport = async () => {
+    if (!xmlUrl.trim()) {
+      setUploadMessage({ type: 'error', text: 'Por favor, insira uma URL válida.' });
+      return;
+    }
+
+    // Validação básica de URL
+    try {
+      new URL(xmlUrl);
+    } catch {
+      setUploadMessage({ type: 'error', text: 'URL inválida. Verifique o formato.' });
+      return;
+    }
+
+    setIsUrlLoading(true);
+    setUploadMessage(null);
+
+    try {
+      const { records, filename } = await fetchXMLFromURL(xmlUrl);
+      
+      if (records.length === 0) {
+        setUploadMessage({ 
+          type: 'error', 
+          text: `Nenhum registro encontrado no arquivo da URL.` 
+        });
+        setIsUrlLoading(false);
+        return;
+      }
+
+      addUploadedRecords(records);
+      setUploadedFiles(prev => [...prev, filename]);
+      setXmlUrl('');
+      
+      setUploadMessage({ 
+        type: 'success', 
+        text: `Arquivo "${filename}" importado com sucesso! ${records.length} registros adicionados.` 
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    } catch (err) {
+      setUploadMessage({ 
+        type: 'error', 
+        text: err instanceof Error ? err.message : 'Erro ao importar arquivo da URL.' 
+      });
+    } finally {
+      setIsUrlLoading(false);
     }
   };
 

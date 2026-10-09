@@ -49,6 +49,30 @@ export function clearUploadedRecords(): void {
   cachedRecords = null;
 }
 
+/**
+ * Busca e processa XML de uma URL
+ */
+export async function fetchXMLFromURL(url: string): Promise<{ records: SanctionedRecord[]; filename: string }> {
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const xmlContent = await response.text();
+    const records = SanctionsXMLParser.parse(xmlContent);
+    
+    // Extrair nome do arquivo da URL
+    const urlParts = url.split('/');
+    const filename = urlParts[urlParts.length - 1] || 'remote-xml';
+    
+    return { records, filename };
+  } catch (error) {
+    throw new Error(`Erro ao buscar XML da URL: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+  }
+}
+
 function generateAIAnalysis(searchName: string, record: SanctionedRecord, score: number) {
   const normalizedSearch = searchName.toLowerCase().trim();
   const normalizedRecord = record.primaryName.toLowerCase().trim();
