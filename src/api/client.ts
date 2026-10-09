@@ -6,7 +6,7 @@ import { loadAllSanctionsXML } from '../lib/xml-parser';
 let cachedRecords: SanctionedRecord[] | null = null;
 
 /**
- * Carrega TODOS os registros dos XMLs (com cache)
+ * Carrega TODOS os registros dos XMLs da pasta archives/ (com cache)
  */
 async function getRecords(): Promise<SanctionedRecord[]> {
   if (!cachedRecords) {
@@ -98,7 +98,7 @@ export async function searchRecords(
   page: number = 1,
   minScore: number = 0
 ): Promise<SearchResponse> {
-  await delay(100 + Math.random() * 200); // Simular processamento
+  await delay(100 + Math.random() * 200);
 
   if (!name || name.trim().length < 2) {
     return {
@@ -115,6 +115,21 @@ export async function searchRecords(
 
   const startTime = Date.now();
   const records = await getRecords();
+  
+  // Se não há dados carregados, retorna vazio
+  if (records.length === 0) {
+    return {
+      query: name,
+      totalResults: 0,
+      page,
+      pageSize: limit,
+      results: [],
+      aiAvailable: false,
+      aiModel: null,
+      searchTimeMs: Date.now() - startTime,
+    };
+  }
+
   const results: SearchResult[] = [];
 
   for (const record of records) {
@@ -183,19 +198,21 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     totalIndividuals: individuals,
     totalEntities: entities,
     totalRecords: records.length,
-    lastSyncTime: new Date().toISOString(),
-    lastSyncStatus: 'SUCCESS',
+    lastSyncTime: records.length > 0 ? new Date().toISOString() : null,
+    lastSyncStatus: records.length > 0 ? 'SUCCESS' : 'NEVER',
     recentFailures: [],
     ollamaAvailable: true,
     ollamaModel: 'qwen3:4b',
-    dataFreshness: new Date().toISOString().split('T')[0],
+    dataFreshness: records.length > 0 ? new Date().toISOString().split('T')[0] : null,
   };
 }
 
 export async function getSyncStatus(): Promise<SyncStatus> {
   await delay(50);
+  const records = await getRecords();
+  
   return {
-    lastSync: {
+    lastSync: records.length > 0 ? {
       id: 1,
       startTime: new Date().toISOString(),
       completionTime: new Date().toISOString(),
@@ -205,8 +222,8 @@ export async function getSyncStatus(): Promise<SyncStatus> {
       recordsRemoved: 0,
       failures: 0,
       errorSummary: null,
-      sourceUrl: 'Local XML File',
-    },
+      sourceUrl: 'Local XML Files',
+    } : null,
     isRunning: false,
     scheduledInterval: 'Manual',
     nextScheduledRun: null,
@@ -215,17 +232,23 @@ export async function getSyncStatus(): Promise<SyncStatus> {
 
 export async function getImportHistory(): Promise<ImportJob[]> {
   await delay(50);
+  const records = await getRecords();
+  
+  if (records.length === 0) {
+    return [];
+  }
+  
   return [{
     id: 1,
     startTime: new Date().toISOString(),
     completionTime: new Date().toISOString(),
     status: 'COMPLETED',
-    recordsCreated: 0,
+    recordsCreated: records.length,
     recordsUpdated: 0,
     recordsRemoved: 0,
     failures: 0,
     errorSummary: null,
-    sourceUrl: 'Local XML File',
+    sourceUrl: 'Local XML Files',
   }];
 }
 
@@ -233,19 +256,19 @@ export async function triggerSync(): Promise<ImportJob> {
   await delay(500);
   // Recarregar XML
   clearRecordsCache();
-  await getRecords();
+  const records = await getRecords();
   
   return {
     id: Date.now(),
     startTime: new Date().toISOString(),
     completionTime: new Date().toISOString(),
     status: 'COMPLETED',
-    recordsCreated: 0,
+    recordsCreated: records.length,
     recordsUpdated: 0,
     recordsRemoved: 0,
     failures: 0,
     errorSummary: null,
-    sourceUrl: 'Local XML File',
+    sourceUrl: 'Local XML Files',
   };
 }
 

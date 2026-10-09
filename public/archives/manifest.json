@@ -1,8 +1,5 @@
 {
-  "files": [
-    "sanctions-list.xml",
-    "un-official-sample.xml"
-  ],
-  "description": "Lista de arquivos XML de sanções a serem carregados pelo sistema",
-  "lastUpdated": "2024-12-01"
+  "files": [],
+  "description": "Adicione os nomes dos seus arquivos XML aqui",
+  "instructions": "Coloque seus arquivos XML na pasta archives/ e liste-os no array 'files' acima"
 }
