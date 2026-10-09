@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: sanctions-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sanctions_screening}
+      POSTGRES_USER: ${POSTGRES_USER:-screening_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+    ports:
+      - "127.0.0.1:5432:5432"  # Only accessible from localhost
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-screening_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sanctions-network
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sanctions-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-sanctions_screening}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-screening_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:4b}
+      OLLAMA_ENABLED: ${OLLAMA_ENABLED:-true}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-30}
+    ports:
+      - "127.0.0.1:8080:8080"  # Only accessible from localhost
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sanctions-network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sanctions-frontend
+    ports:
+      - "127.0.0.1:3000:80"  # Only accessible from localhost
+    depends_on:
+      - backend
+    networks:
+      - sanctions-network
+
+  # Ollama (Local AI)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sanctions-ollama
+    ports:
+      - "127.0.0.1:11434:11434"  # Only accessible from localhost
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - sanctions-network
+
+volumes:
+  postgres_data:
+    driver: local
+  ollama_data:
+    driver: local
+
+networks:
+  sanctions-network:
+    driver: bridge

@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+target/
+**/target/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+coverage/
+**/coverage/
+
+# Docker
+docker/volumes/
+
+# Compiled
+*.class
+*.jar
+*.war
+
+# Temporary
+tmp/
+temp/
+*.tmp
+.next/
+build/
