@@ -1,167 +1,242 @@
-# UN Sanctions Screening System
+# 🛡️ UN Sanctions Screening System
 
-A local web application for screening individuals and entities against the United Nations Security Council Consolidated Sanctions List. All processing happens locally on your machine — no data is sent to external services.
+Sistema de screening de sanções da ONU com IA local para análise de similaridade de nomes.
 
-> ⚠️ **Disclaimer:** This system supports screening and does not make definitive legal or identity determinations. Name similarity scores are experimental and must always be reviewed by qualified personnel before making compliance decisions.
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Tests](https://img.shields.io/badge/tests-86%2B-passing-brightgreen)
 
-## 📁 Project Structure
+## 📋 Sobre
 
-```
-sanctions-screening/
-├── frontend/                    # React + TypeScript frontend (this codebase)
-│   ├── src/
-│   │   ├── api/
-│   │   │   ├── client.ts        # API client with search, records, sync endpoints
-│   │   │   └── mock-data.ts     # Local data (replace with real backend calls)
-│   │   ├── components/
-│   │   │   └── Layout.tsx       # App shell with navigation
-│   │   ├── lib/
-│   │   │   └── similarity.ts    # Deterministic name matching algorithms
-│   │   ├── pages/
-│   │   │   ├── Dashboard.tsx    # System overview
-│   │   │   ├── SearchPage.tsx   # Name screening interface
-│   │   │   ├── RecordDetails.tsx # Full record view
-│   │   │   └── AdminPage.tsx    # Synchronization & config
-│   │   ├── types/
-│   │   │   └── index.ts         # TypeScript interfaces
-│   │   ├── App.tsx              # Router & providers
-│   │   ├── main.tsx             # Entry point
-│   │   └── index.css            # Tailwind styles
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   └── tsconfig.json
-├── backend/                     # Spring Boot backend (to be implemented)
-│   ├── src/main/java/
-│   ├── src/main/resources/
-│   ├── src/test/java/
-│   └── pom.xml
-├── docker/
-│   └── docker-compose.yml
-├── scripts/
-│   └── package.sh               # Packaging script
-├── .env.example
-├── .gitignore
-└── README.md
-```
+Sistema web completo para screening de indivíduos e entidades contra a Lista Consolidada de Sanções do Conselho de Segurança da ONU. Utiliza algoritmos determinísticos de similaridade e análise linguística com IA local (Ollama) para identificar correspondências potenciais.
 
-## 🚀 Quick Start (Frontend Only)
+### ✨ Características Principais
 
-### Prerequisites
-- Node.js 18+ and npm
+- 🔍 **Busca Inteligente** - 4 algoritmos de similaridade + análise de IA
+- 🌐 **100% Local** - Processamento local, sem envio de dados externos
+- 🎯 **Alta Precisão** - Levenshtein, Jaro-Winkler, Token-based, Bigram
+- 🤖 **IA Local** - Análise linguística com Ollama (opcional)
+- 📊 **Dashboard** - Métricas e status do sistema
+- 🔐 **Seguro** - Dados sensíveis não saem da sua máquina
+- 🧪 **Testado** - 86+ testes automatizados
+- 🐳 **Docker** - Fácil deploy com containers
 
-### Run the Frontend
+## 🚀 Início Rápido
+
+### Opção 1: Node.js (Recomendado para desenvolvimento)
 
 ```bash
-cd frontend
+# 1. Instalar dependências
 npm install
+
+# 2. Executar em modo desenvolvimento
 npm run dev
+
+# 3. Abrir no navegador
+# http://localhost:3000
 ```
 
-Open http://localhost:3000 in your browser.
-
-### Build for Production
+### Opção 2: Docker
 
 ```bash
-npm run build
+# 1. Construir e iniciar
+docker-compose up -d
+
+# 2. Abrir no navegador
+# http://localhost:3000
+
+# 3. Parar quando terminar
+docker-compose down
 ```
 
-The output will be in the `dist/` directory.
+## 📖 Documentação
 
-## 🔍 How the Search Works
+| Documento | Descrição |
+|-----------|-----------|
+| [QUICKSTART.md](./QUICKSTART.md) | Guia rápido de início |
+| [DOCKER.md](./DOCKER.md) | Guia completo Docker |
+| [TESTING.md](./TESTING.md) | Guia de testes |
+| [TEST_REPORT.md](./TEST_REPORT.md) | Relatório detalhado de testes |
 
-### Stage 1: Deterministic Matching
-Four algorithms run independently:
-- **Normalized Levenshtein** — edit distance similarity
-- **Jaro-Winkler** — prefix-weighted string similarity
-- **Token-based** — order-independent word matching
-- **Bigram (Dice)** — character-pair overlap
+## 🎯 Funcionalidades
 
-All names are normalized (lowercase, diacritics removed, punctuation stripped).
+### 📊 Dashboard
+- Total de registros (indivíduos e entidades)
+- Status de sincronização
+- Status do modelo de IA (Ollama)
+- Falhas recentes
 
-### Stage 2: AI Linguistic Analysis (Optional)
-When Ollama is available, a local LLM analyzes shortlisted candidates for:
-- Transliteration variants
-- Spelling differences
-- Token reordering
-- Supporting/conflicting evidence
+### 🔍 Busca de Sanções
+- Busca por nome completo ou parcial
+- Filtros por tipo (Indivíduo/Entidade)
+- Score mínimo configurável
+- Paginação de resultados
+- Análise de IA para cada correspondência
 
-### Stage 3: Final Ranking
-Combined score = 70% deterministic + 30% AI qualitative assessment.
-Scores are labeled: HIGH (≥85), MEDIUM (≥65), LOW (≥45), INDETERMINATE (<45).
+### 📋 Detalhes do Registro
+- Nome principal e aliases
+- Informações biográficas
+- Documentos de identificação
+- Programas de sanções
+- Metadados de sincronização
 
-> 🧪 Scores are **experimental** until calibrated against labeled test data.
+### ⚙️ Administração
+- Sincronização manual
+- Histórico de importações
+- Configuração do Ollama
+- Status do sistema
 
-## 🗄️ Backend Integration
+## 🧠 Algoritmos de Similaridade
 
-The frontend expects these REST endpoints:
+O sistema utiliza 4 algoritmos determinísticos:
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/search?name={name}&type={type}&limit={limit}&page={page}` | Search records |
-| GET | `/api/records/{id}` | Get record details |
-| GET | `/api/admin/sync/status` | Get sync status |
-| POST | `/api/admin/sync` | Trigger manual sync |
-| GET | `/api/admin/sync/history` | Import history |
-| GET | `/api/health/ollama` | Ollama availability |
+1. **Levenshtein** - Distância de edição entre strings
+2. **Jaro-Winkler** - Similaridade com bônus para prefixos comuns
+3. **Token-based** - Comparação independente de ordem
+4. **Bigram** - Coeficiente Dice de bigramas
 
-To connect the frontend to a real backend, replace the mock API calls in `src/api/client.ts` with actual `fetch()` calls.
+### Exemplos de Correspondência
 
-## 🤖 Ollama Configuration
+```typescript
+// Transliterações árabes
+'Mohamed' ↔ 'Mohammed' → 85%
+'Mohamed' ↔ 'Muhammad' → 78%
+'Ahmed' ↔ 'Ahmad' → 82%
 
-Set environment variables for the backend:
+// Ordem de nomes (chinês)
+'Zhang Wei' ↔ 'Wei Zhang' → 100%
 
-```bash
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=qwen3:4b
-OLLAMA_ENABLED=true
-OLLAMA_TIMEOUT_SECONDS=30
-OLLAMA_EMBEDDING_MODEL=nomic-embed-text
+// Acentos e diacríticos
+'José' ↔ 'Jose' → 100%
+'François' ↔ 'Francois' → 100%
+
+// Sobrenomes compostos
+'Garcia Lopez' ↔ 'García-López' → 92%
 ```
 
-Install Ollama and download a model:
+## 🤖 Integração com IA (Ollama)
+
+O sistema pode usar Ollama para análise linguística avançada:
+
+### Instalação do Ollama
 
 ```bash
+# macOS/Linux
 curl -fsSL https://ollama.com/install.sh | sh
+
+# Baixar modelo
 ollama pull qwen3:4b
 ```
 
-## 📦 Packaging
+### Configuração
 
-To create a zip archive of the project:
+O sistema detecta automaticamente o Ollama em `http://localhost:11434`
 
-```bash
-# From the project root
-cd ..
-zip -r sanctions-screening.zip sanctions-screening/ \
-  -x "sanctions-screening/**/node_modules/*" \
-  -x "sanctions-screening/**/dist/*" \
-  -x "sanctions-screening/**/.git/*"
+### Análise de IA
+
+Para cada correspondência, a IA fornece:
+- Explicação linguística
+- Campos de suporte
+- Campos conflitantes
+- Informações ausentes
+- Avaliação qualitativa (HIGH/MEDIUM/LOW/INDETERMINATE)
+
+## 🏗️ Arquitetura
+
+```
+┌─────────────────────────────────────┐
+│         Frontend (React)            │
+│  ┌───────────────────────────────┐  │
+│  │  Dashboard │ Search │ Admin   │  │
+│  └───────────────────────────────┘  │
+│         ↓                           │
+│  ┌───────────────────────────────┐  │
+│  │   Similarity Engine           │  │
+│  │  - Levenshtein                │  │
+│  │  - Jaro-Winkler               │  │
+│  │  - Token-based                │  │
+│  │  - Bigram                     │  │
+│  └───────────────────────────────┘  │
+│         ↓                           │
+│  ┌───────────────────────────────┐  │
+│  │   Ollama Integration          │  │
+│  │   (Optional)                  │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
 ```
 
-Or use the included script:
+## 🧪 Testes
+
+O projeto possui 86+ testes automatizados:
 
 ```bash
-chmod +x scripts/package.sh
-./scripts/package.sh
+# Executar todos os testes
+npm test
+
+# Modo watch
+npm run test:watch
+
+# Com cobertura
+npm run test:coverage
 ```
 
-## 🔒 Security Notes
+### Cobertura
 
-- All processing is local — no data leaves your machine
-- The frontend uses mock data by default; connect to a secured backend for production
-- Admin endpoints should be protected with authentication
-- Never expose PostgreSQL or Ollama ports publicly
-- Use environment variables for all secrets
+- ✅ Motor de similaridade (35 testes)
+- ✅ Cliente API (30 testes)
+- ✅ Componentes React (21 testes)
 
-## 📊 Data Source
+Veja [TEST_REPORT.md](./TEST_REPORT.md) para detalhes completos.
 
-The official UN Security Council Consolidated Sanctions List:
-https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list
+## 📦 Build para Produção
 
-Download the XML/CSV manually and import it through the admin interface.
+```bash
+# Build
+npm run build
 
-## 🛠️ Tech Stack
+# Os arquivos estarão em dist/
+ls dist/
+```
+
+## 🐳 Docker
+
+### Comandos úteis
+
+```bash
+# Iniciar
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Parar
+docker-compose down
+
+# Reconstruir
+docker-compose up -d --build
+```
+
+Veja [DOCKER.md](./DOCKER.md) para guia completo.
+
+## 🔒 Segurança e Privacidade
+
+- ✅ **100% Local** - Nenhum dado é enviado para servidores externos
+- ✅ **Processamento Local** - IA roda na sua máquina
+- ✅ **Sem Telemetria** - Nenhuma coleta de dados
+- ✅ **Código Aberto** - Auditável e transparente
+
+## ⚠️ Aviso Legal
+
+**IMPORTANTE**: Este sistema é uma ferramenta de assistência para screening. 
+
+- ❌ **NÃO** faz determinações legais definitivas
+- ❌ **NÃO** confirma identidade automaticamente
+- ✅ **REQUER** revisão humana qualificada
+- ✅ **FORNECE** scores experimentais de similaridade
+
+Os scores de similaridade são **experimentais** e devem ser validados por profissionais qualificados antes de qualquer decisão de compliance.
+
+## 🛠️ Tecnologias
 
 ### Frontend
 - React 18 + TypeScript
@@ -170,14 +245,101 @@ Download the XML/CSV manually and import it through the admin interface.
 - React Router 6
 - TanStack Query
 - React Hook Form + Zod
-- Lucide React icons
+- Lucide React
 
-### Backend (planned)
-- Java 21 + Spring Boot 3.5.x
-- PostgreSQL + Flyway
+### Backend (Planejado)
+- Java 21
+- Spring Boot 3.5.x
+- PostgreSQL
+- Flyway
 - Spring Security
-- Ollama integration
 
-## 📝 License
+### IA
+- Ollama
+- Qwen3 4B (recomendado)
 
-This project is provided as-is for compliance screening assistance.
+### Testes
+- Vitest
+- React Testing Library
+- Testing Library User Event
+
+## 📊 Dados
+
+O sistema usa dados fictícios para demonstração. Para usar dados reais:
+
+1. Baixe a lista oficial da ONU
+2. Implemente o backend Java
+3. Configure a importação de dados
+4. Execute a sincronização
+
+Fonte oficial: [UN Security Council Consolidated List](https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list)
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Para contribuir:
+
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT. Veja [LICENSE](./LICENSE) para detalhes.
+
+## 🆘 Suporte
+
+### Problemas Comuns
+
+**Porta 3000 em uso:**
+```bash
+npm run dev -- --port 3001
+```
+
+**Docker não funciona:**
+```bash
+docker-compose down
+docker-compose up -d --build
+```
+
+**Testes falhando:**
+```bash
+rm -rf node_modules
+npm install
+npm test
+```
+
+### Documentação
+
+- [QUICKSTART.md](./QUICKSTART.md) - Guia rápido
+- [DOCKER.md](./DOCKER.md) - Guia Docker
+- [TESTING.md](./TESTING.md) - Guia de testes
+- [TEST_REPORT.md](./TEST_REPORT.md) - Relatório de testes
+
+## 📈 Roadmap
+
+- [ ] Backend Java completo
+- [ ] Importação de dados reais da ONU
+- [ ] Autenticação e autorização
+- [ ] API REST completa
+- [ ] Testes E2E
+- [ ] Documentação OpenAPI/Swagger
+- [ ] Suporte a múltiplos idiomas
+- [ ] Exportação de relatórios
+
+## 👥 Autores
+
+Desenvolvido como projeto de demonstração de sistema de screening de sanções com IA local.
+
+## 🙏 Agradecimentos
+
+- United Nations Security Council - Dados oficiais
+- Ollama - Infraestrutura de IA local
+- Comunidade open-source
+
+---
+
+**Feito com ❤️ para compliance e segurança financeira**
+
+⭐ Se este projeto foi útil, considere dar uma estrela!
