@@ -1,31 +1,31 @@
-# 📁 Sistema de Sanções com XML Local
+# XML Guide - Local Data System
 
-Este sistema funciona com um arquivo XML local contendo a lista de sanções.
+This system works with a local XML file containing the data list.
 
-## 📂 Estrutura de Arquivos
+## File Structure
 
 ```
-UN-Sanctions-Screening-System/
-├── public/
-│   └── archives/
-│       └── sanctions-list.xml    ← Arquivo XML com dados
-├── src/
-│   ├── lib/
-│   │   └── xml-parser.ts        ← Parser do XML
-│   ├── api/
-│   │   └── client.ts            ← API que usa o XML
-│   └── pages/
-│       └── DataManager.tsx      ← Gerenciamento de dados
+name-matching-system/
++-- public/
+|   +-- archives/
+|       +-- data-list.xml    <- XML file with data
++-- src/
+|   +-- lib/
+|   |   +-- xml-parser.ts    <- XML parser
+|   +-- api/
+|   |   +-- client.ts        <- API that uses XML
+|   +-- pages/
+|       +-- DataManager.tsx  <- Data management
 ```
 
-## 📄 Formato do Arquivo XML
+## XML File Format
 
-O arquivo XML deve seguir esta estrutura:
+The XML file should follow this structure:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<sanctionsList>
-  <!-- Indivíduos -->
+<dataList>
+  <!-- Individuals -->
   <individual id="REG-001" dateListed="2020-01-01" lastUpdate="2024-01-15">
     <primaryName>John Smith</primaryName>
     <alias quality="good">Johnny Smith</alias>
@@ -41,7 +41,7 @@ O arquivo XML deve seguir esta estrutura:
     </program>
   </individual>
 
-  <!-- Entidades -->
+  <!-- Entities -->
   <entity id="REG-002" dateListed="2021-01-01" lastUpdate="2024-01-15">
     <primaryName>Company Ltd</primaryName>
     <alias quality="good">CL</alias>
@@ -50,167 +50,167 @@ O arquivo XML deve seguir esta estrutura:
       Listed for regulatory violations
     </program>
   </entity>
-</sanctionsList>
+</dataList>
 ```
 
-## 🏷️ Elementos e Atributos
+## Elements and Attributes
 
-### `<individual>` - Pessoa Física
-**Atributos:**
-- `id` (obrigatório): Identificador único (ex: "REG-001")
-- `dateListed` (opcional): Data de inclusão na lista
-- `lastUpdate` (opcional): Data da última atualização
+### `<individual>` - Natural Person
+**Attributes:**
+- `id` (required): Unique identifier (e.g., "REG-001")
+- `dateListed` (optional): Date of inclusion in the list
+- `lastUpdate` (optional): Date of last update
 
-**Elementos filhos:**
-- `<primaryName>` (obrigatório): Nome principal
-- `<alias>` (opcional, múltiplo): Nomes alternativos
-  - Atributo `quality` (opcional): "good", "low", etc.
-- `<dateOfBirth>` (opcional): Data de nascimento
-  - Atributo `precision`: "EXACT", "YEAR_ONLY", "APPROXIMATE"
-- `<placeOfBirth>` (opcional): Local de nascimento
-- `<nationality>` (opcional): Nacionalidade
-- `<gender>` (opcional): "M" ou "F"
-- `<document>` (opcional, múltiplo): Documentos de identificação
-  - Atributos: `type`, `number`, `issuingCountry`
-- `<address>` (opcional, múltiplo): Endereços
-- `<program>` (opcional, múltiplo): Programas de sanção
-  - Atributos: `name`, `reference`
-  - Conteúdo: Detalhes da listagem
+**Child elements:**
+- `<primaryName>` (required): Primary name
+- `<alias>` (optional, multiple): Alternative names
+  - Attribute `quality` (optional): "good", "low", etc.
+- `<dateOfBirth>` (optional): Date of birth
+  - Attribute `precision`: "EXACT", "YEAR_ONLY", "APPROXIMATE"
+- `<placeOfBirth>` (optional): Place of birth
+- `<nationality>` (optional): Nationality
+- `<gender>` (optional): "M" or "F"
+- `<document>` (optional, multiple): Identification documents
+  - Attributes: `type`, `number`, `issuingCountry`
+- `<address>` (optional, multiple): Addresses
+- `<program>` (optional, multiple): Programs
+  - Attributes: `name`, `reference`
+  - Content: Listing details
 
-### `<entity>` - Pessoa Jurídica
-**Atributos:**
-- `id` (obrigatório): Identificador único
-- `dateListed` (opcional): Data de inclusão
-- `lastUpdate` (opcional): Data da última atualização
+### `<entity>` - Legal Entity
+**Attributes:**
+- `id` (required): Unique identifier
+- `dateListed` (optional): Date of inclusion
+- `lastUpdate` (optional): Date of last update
 
-**Elementos filhos:**
-- `<primaryName>` (obrigatório): Nome principal
-- `<alias>` (opcional, múltiplo): Nomes alternativos
-- `<address>` (opcional, múltiplo): Endereços
-- `<program>` (opcional, múltiplo): Programas de sanção
+**Child elements:**
+- `<primaryName>` (required): Primary name
+- `<alias>` (optional, multiple): Alternative names
+- `<address>` (optional, multiple): Addresses
+- `<program>` (optional, multiple): Programs
 
-## 🔄 Como Usar
+## How to Use
 
-### 1. Editar o Arquivo XML
+### 1. Edit the XML File
 
-O arquivo padrão está em:
+The default file is at:
 ```
-public/archives/sanctions-list.xml
+public/archives/data-list.xml
 ```
 
-Edite este arquivo com seus dados ou substitua por um arquivo XML oficial da ONU.
+Edit this file with your data or replace it with an official XML file.
 
-### 2. Recarregar os Dados
+### 2. Reload Data
 
-Após editar o arquivo XML:
+After editing the XML file:
 
-1. Acesse a página **"Data"** no menu
-2. Clique em **"Recarregar Dados"**
-3. O sistema irá重新 processar o XML
+1. Access the **"Data"** page in the menu
+2. Click **"Reload Data"**
+3. The system will reprocess the XML
 
-### 3. Fazer Buscas
+### 3. Perform Searches
 
-1. Acesse a página **"Search"**
-2. Digite um nome para buscar
-3. O sistema buscará no XML carregado
+1. Access the **"Search"** page
+2. Enter a name to search
+3. The system will search in the loaded XML
 
-## 📊 Estatísticas
+## Statistics
 
-O Dashboard mostra:
-- Total de registros carregados
-- Número de indivíduos
-- Número de entidades
-- Data da última sincronização
+The Dashboard shows:
+- Total loaded records
+- Number of individuals
+- Number of entities
+- Last synchronization date
 
-## 🔍 Exemplos de Busca
+## Search Examples
 
-Com o XML de exemplo, tente buscar:
+With the sample XML, try searching for:
 
-- `John` → Encontra "John Alexander Smith"
-- `Maria` → Encontra "Maria Elena Rodriguez"
-- `Zhang` → Encontra "Chen Wei Zhang"
-- `Global` → Encontra "Global Trading Corporation"
-- `Ahmed` → Encontra "Ahmed Hassan Ibrahim"
+- `John` -> Finds "John Smith"
+- `Maria` -> Finds "Maria Elena Rodriguez"
+- `Zhang` -> Finds "Chen Wei Zhang"
+- `Global` -> Finds "Global Trading Corporation"
+- `Ahmed` -> Finds "Ahmed Hassan Ibrahim"
 
-## ⚙️ Funcionamento Interno
+## Internal Operation
 
-1. **Carregamento**: O XML é carregado via `fetch('/archives/sanctions-list.xml')`
-2. **Parsing**: O `xml-parser.ts` converte XML em objetos TypeScript
-3. **Cache**: Os dados são mantidos em cache para performance
-4. **Busca**: O `client.ts` usa os dados em cache para buscas
-5. **Similaridade**: Algoritmos calculam scores de similaridade
+1. **Loading**: XML is loaded via `fetch('/archives/data-list.xml')`
+2. **Parsing**: `xml-parser.ts` converts XML to TypeScript objects
+3. **Cache**: Data is kept in cache for performance
+4. **Search**: `client.ts` uses cached data for searches
+5. **Similarity**: Algorithms calculate similarity scores
 
-## 🛡️ Segurança
+## Security
 
-- ✅ Todos os dados são processados localmente
-- ✅ Nenhum dado é enviado para servidores externos
-- ✅ XML é validado antes do processamento
-- ✅ Parser seguro contra XXE (XML External Entity)
+- ✓ All data is processed locally
+- ✓ No data is sent to external servers
+- ✓ XML is validated before processing
+- ✓ Parser is secure against XXE (XML External Entity)
 
-## 📝 Validação
+## Validation
 
-O sistema valida:
-- XML bem formado
-- Estrutura esperada
-- Campos obrigatórios
-- Tipos de dados
+The system validates:
+- Well-formed XML
+- Expected structure
+- Required fields
+- Data types
 
-## 🔄 Atualizando Dados
+## Updating Data
 
-### Opção 1: Editar o Arquivo
+### Option 1: Edit the File
 ```bash
-# Edite diretamente
-nano public/archives/sanctions-list.xml
+# Edit directly
+nano public/archives/data-list.xml
 
-# Ou use seu editor favorito
-code public/archives/sanctions-list.xml
+# Or use your favorite editor
+code public/archives/data-list.xml
 ```
 
-### Opção 2: Substituir o Arquivo
+### Option 2: Replace the File
 ```bash
-# Copie um novo arquivo XML
-cp meu-novo-arquivo.xml public/archives/sanctions-list.xml
+# Copy a new XML file
+cp my-new-file.xml public/archives/data-list.xml
 ```
 
-### Opção 3: Upload via Interface
-1. Acesse a página **"Data"**
-2. Clique em **"Selecionar Arquivo XML"**
-3. Escolha seu arquivo
-4. Clique em **"Recarregar Dados"**
+### Option 3: Upload via Interface
+1. Access the **"Data"** page
+2. Click **"Select XML File"**
+3. Choose your file
+4. Click **"Reload Data"**
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
-### XML não carrega
-- Verifique se o arquivo está em `public/archives/`
-- Verifique se o nome é `sanctions-list.xml`
-- Verifique se o XML é válido (use um validador online)
+### XML does not load
+- Check if file is in `public/archives/`
+- Check if name is `data-list.xml`
+- Check if XML is valid (use an online validator)
 
-### Dados não atualizam
-- Limpe o cache do navegador (Ctrl+Shift+R)
-- Clique em "Recarregar Dados" na página Data
-- Verifique o console do navegador para erros
+### Data does not update
+- Clear browser cache (Ctrl+Shift+R)
+- Click "Reload Data" on Data page
+- Check browser console for errors
 
-### Busca não encontra resultados
-- Verifique se o XML foi carregado corretamente
-- Verifique a ortografia do nome
-- Tente buscar por parte do nome
-- Reduza o score mínimo na busca
+### Search does not find results
+- Check if XML was loaded correctly
+- Check name spelling
+- Try searching for part of the name
+- Reduce minimum score in search
 
-## 📚 Recursos
+## Resources
 
-- [Documentação XML](https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction)
+- [XML Documentation](https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction)
 - [DOMParser API](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser)
 - [XPath](https://developer.mozilla.org/en-US/docs/Web/XPath)
 
-## ⚠️ Notas Importantes
+## Important Notes
 
-1. **Dados de Demonstração**: O XML incluído contém dados fictícios para teste
-2. **Dados Reais**: Para uso em produção, substitua por dados oficiais da ONU
-3. **Privacidade**: Todos os dados são processados localmente
-4. **Performance**: O XML é carregado uma vez e mantido em cache
+1. **Demo Data**: Included XML contains fictional data for testing
+2. **Real Data**: For production use, replace with official data
+3. **Privacy**: All data is processed locally
+4. **Performance**: XML is loaded once and kept in cache
 
 ---
 
-**Pronto para usar!** 🎉
+**Ready to use!**
 
-Edite o arquivo `public/archives/sanctions-list.xml` com seus dados e comece a usar o sistema.
+Edit the file `public/archives/data-list.xml` with your data and start using the system.

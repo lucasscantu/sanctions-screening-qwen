@@ -1,210 +1,210 @@
-# 🐳 Docker - UN Sanctions Screening System
+# Docker - Name Matching System
 
-Este documento contém instruções para executar o sistema usando Docker.
+This document contains instructions for running the system using Docker.
 
-## 📋 Pré-requisitos
+## Prerequisites
 
 - Docker Engine 20.10+
 - Docker Compose 2.0+
 
-Verifique a instalação:
+Verify installation:
 ```bash
 docker --version
 docker-compose --version
 ```
 
-## 🚀 Início Rápido
+## Quick Start
 
-### 1. Construir e iniciar o container
+### 1. Build and start the container
 
 ```bash
 docker-compose up -d --build
 ```
 
-### 2. Verificar se está rodando
+### 2. Verify it is running
 
 ```bash
 docker-compose ps
 ```
 
-### 3. Acessar a aplicação
+### 3. Access the application
 
-Abra no navegador: **http://localhost:3000**
+Open in browser: **http://localhost:3000**
 
-### 4. Ver logs
+### 4. View logs
 
 ```bash
 docker-compose logs -f frontend
 ```
 
-### 5. Parar o container
+### 5. Stop the container
 
 ```bash
 docker-compose down
 ```
 
-## 📦 Comandos Úteis
+## Useful Commands
 
-### Reconstruir após mudanças no código
+### Rebuild after code changes
 ```bash
 docker-compose up -d --build
 ```
 
-### Parar e remover volumes
+### Stop and remove volumes
 ```bash
 docker-compose down -v
 ```
 
-### Executar comandos dentro do container
+### Run commands inside the container
 ```bash
 docker-compose exec frontend sh
 ```
 
-### Ver uso de recursos
+### View resource usage
 ```bash
-docker stats sanctions-frontend
+docker stats frontend
 ```
 
-## 🔧 Configuração
+## Configuration
 
-### Alterar a porta
+### Change the port
 
-Edite o `docker-compose.yml`:
+Edit `docker-compose.yml`:
 ```yaml
 ports:
-  - "8080:80"  # Mude 8080 para a porta desejada
+  - "8080:80"  # Change 8080 to desired port
 ```
 
-### Variáveis de ambiente
+### Environment variables
 
-Crie um arquivo `.env` na raiz:
+Create a `.env` file at root:
 ```env
 VITE_API_URL=http://localhost:8080
-VITE_APP_TITLE=UN Sanctions Screening
+VITE_APP_TITLE=Name Matching System
 ```
 
-## 🏗️ Arquitetura
+## Architecture
 
 ```
-┌─────────────────┐
-│   Nginx (80)    │
-│   ┌───────────┐ │
-│   │  React    │ │
-│   │   App     │ │
-│   └───────────┘ │
-└─────────────────┘
-         ↓
++-----------------+
+|   Nginx (80)    |
+|   +-----------+ |
+|   |  React    | |
+|   |   App     | |
+|   +-----------+ |
++-----------------+
+         |
     localhost:3000
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
-### Porta 3000 já em uso
+### Port 3000 already in use
 ```bash
-# Verificar qual processo está usando
+# Check which process is using it
 lsof -i :3000
 
-# Ou use outra porta no docker-compose.yml
+# Or use another port in docker-compose.yml
 ports:
   - "8080:80"
 ```
 
-### Container não inicia
+### Container does not start
 ```bash
-# Ver logs detalhados
+# View detailed logs
 docker-compose logs frontend
 
-# Reconstruir do zero
+# Rebuild from scratch
 docker-compose down
 docker-compose up -d --build
 ```
 
-### Build falhando
+### Build failing
 ```bash
-# Limpar cache do Docker
+# Clear Docker cache
 docker system prune -a
 
-# Reconstruir
+# Rebuild
 docker-compose up -d --build
 ```
 
-### Aplicação não carrega
+### Application does not load
 ```bash
-# Verificar se o container está saudável
+# Check if container is healthy
 docker-compose ps
 
-# Verificar logs do nginx
+# Check nginx logs
 docker-compose exec frontend cat /var/log/nginx/error.log
 ```
 
-## 🔄 Atualizações
+## Updates
 
-### Atualizar código e reconstruir
+### Update code and rebuild
 ```bash
 git pull
 docker-compose up -d --build
 ```
 
-### Atualizar apenas dependências
+### Update only dependencies
 ```bash
 docker-compose exec frontend npm install
 docker-compose restart frontend
 ```
 
-## 📊 Monitoramento
+## Monitoring
 
 ### Health check
 ```bash
 curl http://localhost:3000/health
 ```
 
-### Estatísticas do container
+### Container statistics
 ```bash
-docker stats sanctions-frontend
+docker stats frontend
 ```
 
-## 🗑️ Limpeza
+## Cleanup
 
-### Remover tudo (containers, images, volumes)
+### Remove everything (containers, images, volumes)
 ```bash
 docker-compose down -v --rmi all
 docker system prune -a
 ```
 
-### Remover apenas containers
+### Remove only containers
 ```bash
 docker-compose down
 ```
 
-## 📝 Notas Importantes
+## Important Notes
 
-1. **Modo Local**: Esta aplicação roda 100% localmente. Nenhum dado é enviado para servidores externos.
+1. **Local Mode**: This application runs 100% locally. No data is sent to external servers.
 
-2. **Dados de Demonstração**: A aplicação usa dados fictícios para demonstração. Para usar dados reais, integre com o backend Java.
+2. **Demo Data**: The application uses sample data for demonstration. To use real data, integrate with the Java backend.
 
-3. **Persistência**: Os dados não são persistidos entre reinicializações do container. Para persistência, configure volumes.
+3. **Persistence**: Data is not persisted between container restarts. For persistence, configure volumes.
 
-4. **Produção**: Para produção, considere:
-   - Configurar HTTPS
-   - Adicionar autenticação
-   - Configurar backup de dados
-   - Monitoramento e logs centralizados
+4. **Production**: For production, consider:
+   - Configure HTTPS
+   - Add authentication
+   - Configure data backup
+   - Centralized monitoring and logs
 
-## 🔗 Links Úteis
+## Useful Links
 
-- [Documentação Docker](https://docs.docker.com/)
-- [Documentação Docker Compose](https://docs.docker.com/compose/)
-- [Documentação Nginx](https://nginx.org/en/docs/)
+- [Docker Documentation](https://docs.docker.com/)
+- [Docker Compose Documentation](https://docs.docker.com/compose/)
+- [Nginx Documentation](https://nginx.org/en/docs/)
 
-## 📞 Suporte
+## Support
 
-Se encontrar problemas:
-1. Verifique os logs: `docker-compose logs -f`
-2. Consulte a seção de Troubleshooting acima
-3. Verifique se atende aos pré-requisitos
-4. Abra uma issue no repositório
+If you encounter issues:
+1. Check logs: `docker-compose logs -f`
+2. Consult the Troubleshooting section above
+3. Verify prerequisites are met
+4. Open an issue in the repository
 
 ---
 
-**Versão**: 1.0  
-**Última atualização**: 2024
+**Version**: 1.0
+**Last updated**: December 2024

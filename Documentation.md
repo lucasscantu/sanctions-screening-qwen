@@ -1,50 +1,50 @@
-# Documentacao Tecnica - Sistema de Comparacao de Registros Textuais
+# Technical Documentation - Textual Record Comparison System
 
-## 1. Visao Geral
+## 1. Overview
 
-Aplicacao web em React e TypeScript para comparacao de registros textuais armazenados em arquivos XML. Opera localmente no navegador, sem transmissao de dados.
+Web application in React and TypeScript for comparing textual records stored in XML files. Operates locally in the browser, without data transmission.
 
-### Caracteristicas
+### Features
 
-- Processamento local no navegador
-- Suporte a multiplos formatos XML
-- Quatro algoritmos de similaridade
-- Cache para otimizacao
-- Interface responsiva
-- 86 testes automatizados
+- Local processing in browser
+- Support for multiple XML formats
+- Four similarity algorithms
+- Cache for optimization
+- Responsive interface
+- 86 automated tests
 
 ---
 
-## 2. Modulos Principais
+## 2. Main Modules
 
-### 2.1 Motor de Similaridade (`src/lib/similarity.ts`)
+### 2.1 Similarity Engine (`src/lib/similarity.ts`)
 
-Implementa quatro algoritmos de comparacao de strings:
+Implements four string comparison algorithms:
 
-**Funcoes Exportadas:**
+**Exported Functions:**
 
-- `normalizeName(name: string): string` - Normaliza strings para comparacao
-- `tokenize(name: string): string[]` - Divide string em tokens
-- `levenshteinSimilarity(a: string, b: string): number` - Distancia de edicao
-- `jaroWinklerSimilarity(a: string, b: string): number` - Similaridade com bonus de prefixo
-- `tokenSimilarity(a: string, b: string): number` - Comparacao por tokens
-- `bigramSimilarity(a: string, b: string): number` - Coeficiente Dice de bigramas
-- `calculateSimilarity(search: string, candidate: string, aliases: string[]): number` - Funcao principal
-- `getScoreLabel(score: number): string` - Classifica pontuacao
+- `normalizeName(name: string): string` - Normalizes strings for comparison
+- `tokenize(name: string): string[]` - Splits string into tokens
+- `levenshteinSimilarity(a: string, b: string): number` - Edit distance
+- `jaroWinklerSimilarity(a: string, b: string): number` - Similarity with prefix bonus
+- `tokenSimilarity(a: string, b: string): number` - Token comparison
+- `bigramSimilarity(a: string, b: string): number` - Bigram Dice coefficient
+- `calculateSimilarity(search: string, candidate: string, aliases: string[]): number` - Main function
+- `getScoreLabel(score: number): string` - Classifies score
 
-### 2.2 Parser XML (`src/lib/xml-parser.ts`)
+### 2.2 XML Parser (`src/lib/xml-parser.ts`)
 
-Converte arquivos XML em objetos TypeScript.
+Converts XML files to TypeScript objects.
 
-**Classe `SanctionsXMLParser`:**
+**Class `XMLParser`:**
 
-- `static parse(xmlContent: string): Record[]` - Parseia conteudo XML
-- `static detectFormat(xmlContent: string): string` - Detecta formato
-- `validateXML(xmlContent: string): boolean` - Valida XML
+- `static parse(xmlContent: string): Record[]` - Parses XML content
+- `static detectFormat(xmlContent: string): string` - Detects format
+- `validateXML(xmlContent: string): boolean` - Validates XML
 
-**Formatos Suportados:**
+**Supported Formats:**
 
-Formato A (tags em caixa alta):
+Format A (uppercase tags):
 ```xml
 <RECORD>
   <FIRST_NAME>JOHN</FIRST_NAME>
@@ -53,7 +53,7 @@ Formato A (tags em caixa alta):
 </RECORD>
 ```
 
-Formato B (tags em caixa baixa):
+Format B (lowercase tags):
 ```xml
 <record id="REG-001">
   <name>John Smith</name>
@@ -61,11 +61,11 @@ Formato B (tags em caixa baixa):
 </record>
 ```
 
-### 2.3 Cliente API (`src/api/client.ts`)
+### 2.3 API Client (`src/api/client.ts`)
 
-Gerencia dados e operacoes de busca.
+Manages data and search operations.
 
-**Funcoes Exportadas:**
+**Exported Functions:**
 
 - `searchRecords(name, type?, limit?, page?, minScore?): Promise<SearchResponse>`
 - `getRecordById(id: number): Promise<Record | null>`
@@ -77,18 +77,18 @@ Gerencia dados e operacoes de busca.
 
 ---
 
-## 3. Algoritmos de Comparacao
+## 3. Comparison Algorithms
 
-### 3.1 Distancia de Levenshtein
+### 3.1 Levenshtein Distance
 
-Calcula numero minimo de operacoes de edicao (insercao, delecao, substituicao) para transformar uma string em outra.
+Calculates minimum number of edit operations (insertion, deletion, substitution) to transform one string into another.
 
 **Formula:**
 ```
-similaridade = ((maxLen - distancia) / maxLen) * 100
+similarity = ((maxLen - distance) / maxLen) * 100
 ```
 
-**Implementacao:**
+**Implementation:**
 ```typescript
 function levenshteinDistance(a: string, b: string): number {
   const matrix: number[][] = [];
@@ -109,64 +109,64 @@ function levenshteinDistance(a: string, b: string): number {
 }
 ```
 
-**Casos de Uso:** Erros de digitacao, variacoes menores
+**Use Cases:** Typos, minor variations
 
-### 3.2 Similaridade Jaro-Winkler
+### 3.2 Jaro-Winkler Similarity
 
-Extensao do algoritmo Jaro com bonus para prefixos comuns.
+Extension of Jaro algorithm with bonus for common prefixes.
 
 **Formula:**
 ```
 jaro = (matches/lenA + matches/lenB + (matches - transpositions/2)/matches) / 3
-similaridade = jaro + prefixo * 0.1 * (1 - jaro)
+similarity = jaro + prefix * 0.1 * (1 - jaro)
 ```
 
-**Casos de Uso:** Nomes com prefixos compartilhados, transliteracoes
+**Use Cases:** Names with shared prefixes, transliterations
 
-### 3.3 Similaridade Baseada em Tokens
+### 3.3 Token-Based Similarity
 
-Compara conjuntos de palavras independentemente da ordem.
+Compares word sets regardless of order.
 
 **Formula:**
 ```
-intersecao = tokensA ∩ tokensB
-uniao = tokensA ∪ tokensB
-similaridade = (intersecao / uniao) * 100
+intersection = tokensA ∩ tokensB
+union = tokensA ∪ tokensB
+similarity = (intersection / union) * 100
 ```
 
-**Casos de Uso:** Ordem invertida, componentes em ordem diferente
+**Use Cases:** Reversed order, components in different order
 
-### 3.4 Coeficiente Dice de Bigramas
+### 3.4 Bigram Dice Coefficient
 
-Analisa pares de caracteres consecutivos.
+Analyzes consecutive character pairs.
 
 **Formula:**
 ```
-bigramasA = {str[0:2], str[1:3], str[2:4], ...}
-bigramasB = {str[0:2], str[1:3], str[2:4], ...}
-intersecao = bigramasA ∩ bigramasB
-similaridade = (2 * intersecao / (|bigramasA| + |bigramasB|)) * 100
+bigramsA = {str[0:2], str[1:3], str[2:4], ...}
+bigramsB = {str[0:2], str[1:3], str[2:4], ...}
+intersection = bigramsA ∩ bigramsB
+similarity = (2 * intersection / (|bigramsA| + |bigramsB|)) * 100
 ```
 
-**Casos de Uso:** Variacoes foneticas, padroes de caracteres
+**Use Cases:** Phonetic variations, character patterns
 
-### 3.5 Estrategia de Combinacao
+### 3.5 Combination Strategy
 
-Sistema utiliza maxima pontuacao entre os quatro algoritmos:
+System uses maximum score among four algorithms:
 
 ```typescript
 finalScore = max(levenshtein, jaroWinkler, token, bigram)
 ```
 
-**Justificativa:** Garante que pelo menos uma abordagem identifique correspondencia quando existir.
+**Justification:** Ensures at least one approach identifies match when it exists.
 
 ---
 
-## 4. Processamento de XML
+## 4. XML Processing
 
-### 4.1 Deteccao de Formato
+### 4.1 Format Detection
 
-Parser detecta formato automaticamente:
+Parser automatically detects format:
 
 ```typescript
 if (xmlContent.includes('<RECORD>')) {
@@ -177,9 +177,9 @@ if (xmlContent.includes('<record>')) {
 }
 ```
 
-### 4.2 Parsing de Formato A
+### 4.2 Parsing Format A
 
-**Estrutura:**
+**Structure:**
 ```xml
 <DATAEXPORT>
   <RECORDS>
@@ -201,15 +201,15 @@ if (xmlContent.includes('<record>')) {
 </DATAEXPORT>
 ```
 
-**Mapeamento:**
+**Mapping:**
 - `DATAID` → `referenceNumber`
 - `FIRST_NAME` + `SECOND_NAME` → `primaryName`
 - `ALIAS/NAME` → `aliases[]`
 - `DATE_OF_BIRTH/DATE` → `biographicalDetails.dateOfBirth`
 
-### 4.3 Parsing de Formato B
+### 4.3 Parsing Format B
 
-**Estrutura:**
+**Structure:**
 ```xml
 <records>
   <record id="REG-001" dateListed="2020-01-01">
@@ -220,89 +220,89 @@ if (xmlContent.includes('<record>')) {
 </records>
 ```
 
-**Mapeamento:**
+**Mapping:**
 - `@id` → `referenceNumber`
 - `<name>` → `primaryName`
 - `<alias>` → `aliases[]`
 - `<dateOfBirth>` → `biographicalDetails.dateOfBirth`
 
-### 4.4 Validacao
+### 4.4 Validation
 
-Parser valida:
-- XML bem formado
-- Campos obrigatorios presentes
-- Tipos de dados corretos
+Parser validates:
+- Well-formed XML
+- Required fields present
+- Correct data types
 
-Arquivos invalidos sao rejeitados.
+Invalid files are rejected.
 
 ---
 
-## 5. Interface Web
+## 5. Web Interface
 
 ### 5.1 Dashboard (`/`)
 
-**Componentes:**
-- Cards de estatisticas
-- Status do sistema
-- Informacoes de sincronizacao
+**Components:**
+- Statistics cards
+- System status
+- Synchronization information
 
-**Dados Exibidos:**
-- Total de registros
-- Numero de categorias
-- Data da ultima atualizacao
+**Displayed Data:**
+- Total records
+- Number of categories
+- Last update date
 
-### 5.2 Pagina de Busca (`/search`)
+### 5.2 Search Page (`/search`)
 
-**Componentes:**
-- Campo de entrada
-- Filtros (tipo, pontuacao minima)
-- Lista de resultados
-- Paginacao
+**Components:**
+- Input field
+- Filters (type, minimum score)
+- Results list
+- Pagination
 
-**Interacao:**
-1. Usuario digita texto
-2. Sistema valida (minimo 2 caracteres)
-3. Resultados ordenados por pontuacao
-4. Usuario pode ver detalhes
+**Interaction:**
+1. User enters text
+2. System validates (minimum 2 characters)
+3. Results sorted by score
+4. User can view details
 
-### 5.3 Pagina de Detalhes (`/records/:id`)
+### 5.3 Details Page (`/records/:id`)
 
-**Componentes:**
-- Nome principal
-- Lista de aliases
-- Dados biográficos
-- Documentos
-- Metadados
+**Components:**
+- Primary name
+- Alias list
+- Biographical data
+- Documents
+- Metadata
 
-### 5.4 Gerenciamento de Dados (`/data`)
+### 5.4 Data Management (`/data`)
 
-**Componentes:**
-- Area de upload
-- Lista de arquivos carregados
-- Estatisticas
-- Botoes de acao
+**Components:**
+- Upload area
+- List of loaded files
+- Statistics
+- Action buttons
 
-**Interacao:**
-1. Usuario seleciona arquivo
-2. Sistema processa
-3. Estatisticas atualizadas
+**Interaction:**
+1. User selects file
+2. System processes
+3. Statistics updated
 
 ---
 
-## 6. API Interna
+## 6. Internal API
 
-### 6.1 Funcoes de Busca
+### 6.1 Search Functions
 
 #### `searchRecords(name, type?, limit?, page?, minScore?)`
 
-**Parametros:**
-- `name` (string, obrigatorio): Texto a buscar
-- `type` (string, opcional): Filtrar por tipo
-- `limit` (number, opcional): Resultados por pagina (padrao: 20)
-- `page` (number, opcional): Numero da pagina (padrao: 1)
-- `minScore` (number, opcional): Pontuacao minima 0-100 (padrao: 0)
+**Parameters:**
+- `name` (string, required): Text to search
+- `type` (string, optional): Filter by type
+- `limit` (number, optional): Results per page (default: 20)
+- `page` (number, optional): Page number (default: 1)
+- `minScore` (number, optional): Minimum score 0-100 (default: 0)
 
-**Retorno:**
+**Return:**
 ```typescript
 Promise<{
   query: string,
@@ -314,26 +314,26 @@ Promise<{
 }>
 ```
 
-**Exemplo:**
+**Example:**
 ```typescript
 const results = await searchRecords('John Smith', 'TYPE_A', 10, 1, 50);
 ```
 
-### 6.2 Funcoes de Dados
+### 6.2 Data Functions
 
 #### `getRecordById(id)`
 
-**Parametros:**
-- `id` (number): ID do registro
+**Parameters:**
+- `id` (number): Record ID
 
-**Retorno:**
+**Return:**
 ```typescript
 Promise<Record | null>
 ```
 
 #### `getDashboardStats()`
 
-**Retorno:**
+**Return:**
 ```typescript
 Promise<{
   totalRecords: number,
@@ -343,92 +343,92 @@ Promise<{
 }>
 ```
 
-### 6.3 Funcoes de Upload
+### 6.3 Upload Functions
 
 #### `parseXMLContent(xmlContent)`
 
-**Parametros:**
-- `xmlContent` (string): Conteudo XML
+**Parameters:**
+- `xmlContent` (string): XML content
 
-**Retorno:**
+**Return:**
 ```typescript
 Record[]
 ```
 
 #### `addUploadedRecords(records)`
 
-**Parametros:**
-- `records` (Record[]): Registros a adicionar
+**Parameters:**
+- `records` (Record[]): Records to add
 
 #### `clearUploadedRecords()`
 
-Limpa todos os registros carregados.
+Clears all uploaded records.
 
-### 6.4 Funcoes de Cache
+### 6.4 Cache Functions
 
 #### `clearRecordsCache()`
 
-Invalida cache forcando recarregamento.
+Invalidates cache forcing reload.
 
 ---
 
-## 7. Gerenciamento de Estado
+## 7. State Management
 
-### 7.1 Estrategia de Cache
+### 7.1 Cache Strategy
 
-Sistema utiliza cache em memoria:
+System uses in-memory cache:
 
 ```typescript
 let cachedRecords: Record[] | null = null;
 ```
 
-**Funcionamento:**
-1. Primeira consulta carrega dados
-2. Consultas subsequentes usam cache
-3. Cache invalidado manualmente
+**Operation:**
+1. First query loads data
+2. Subsequent queries use cache
+3. Cache invalidated manually
 
-### 7.2 Invalidacao de Cache
+### 7.2 Cache Invalidation
 
-Cache invalidado em:
-- Upload de novos arquivos
-- Clique em "Recarregar"
-- Clique em "Limpar"
-- Recarregamento da pagina
+Cache invalidated on:
+- Upload of new files
+- Click on "Reload"
+- Click on "Clear"
+- Page reload
 
 ### 7.3 Performance
 
-**Tempos Medios:**
-- Carregamento inicial: 50-200ms
-- Busca em cache: 100-300ms
-- Busca sem cache: 200-500ms
+**Average Times:**
+- Initial load: 50-200ms
+- Cached search: 100-300ms
+- Non-cached search: 200-500ms
 
 ---
 
-## 8. Testes
+## 8. Tests
 
-### 8.1 Estrutura
+### 8.1 Structure
 
-**Arquivos:**
-- `src/test/similarity.test.ts` - 35 testes
-- `src/test/api.test.ts` - 30 testes
-- `src/test/Layout.test.tsx` - 6 testes
-- `src/test/Dashboard.test.tsx` - 6 testes
-- `src/test/SearchPage.test.tsx` - 9 testes
+**Files:**
+- `src/test/similarity.test.ts` - 35 tests
+- `src/test/api.test.ts` - 30 tests
+- `src/test/Layout.test.tsx` - 6 tests
+- `src/test/Dashboard.test.tsx` - 6 tests
+- `src/test/SearchPage.test.tsx` - 9 tests
 
-**Total:** 86 testes, 95% cobertura
+**Total:** 86 tests, 95% coverage
 
-### 8.2 Testes de Similaridade
+### 8.2 Similarity Tests
 
-**Cenarios:**
-- Strings identicas (100%)
-- Diferencas de case (100%)
-- Diferencas de acentos (100%)
-- Erros menores (>80%)
-- Strings diferentes (<50%)
-- Variacoes (>70%)
-- Ordem invertida (100% com token)
+**Scenarios:**
+- Identical strings (100%)
+- Case differences (100%)
+- Accent differences (100%)
+- Minor errors (>80%)
+- Different strings (<50%)
+- Variations (>70%)
+- Reversed order (100% with token)
 
-**Exemplo:**
+**Example:**
 ```typescript
 it('should match variations', () => {
   const score = calculateSimilarity('John', 'Jon');
@@ -436,57 +436,57 @@ it('should match variations', () => {
 });
 ```
 
-### 8.3 Testes de API
+### 8.3 API Tests
 
-**Cenarios:**
-- Busca com query vazia
-- Busca com query valida
-- Filtros por tipo
-- Filtros por pontuacao
-- Paginacao
-- Ordenacao
+**Scenarios:**
+- Search with empty query
+- Search with valid query
+- Filters by type
+- Filters by score
+- Pagination
+- Sorting
 
-### 8.4 Testes de Componentes
+### 8.4 Component Tests
 
-**Cenarios:**
-- Renderizacao correta
-- Interacao do usuario
-- Estados de carregamento
-- Validacao de formularios
+**Scenarios:**
+- Correct rendering
+- User interaction
+- Loading states
+- Form validation
 
-### 8.5 Executando Testes
+### 8.5 Running Tests
 
 ```bash
-# Todos os testes
+# All tests
 npm test
 
-# Modo watch
+# Watch mode
 npm run test:watch
 
-# Com cobertura
+# With coverage
 npm run test:coverage
 ```
 
 ---
 
-## 9. Instalacao
+## 9. Installation
 
-### 9.1 Desenvolvimento
+### 9.1 Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Acesse http://localhost:3000
+Access http://localhost:3000
 
-### 9.2 Build para Producao
+### 9.2 Production Build
 
 ```bash
 npm run build
 ```
 
-Arquivos em `dist/`
+Files in `dist/`
 
 ### 9.3 Docker
 
@@ -495,49 +495,49 @@ Arquivos em `dist/`
 docker-compose up -d --build
 ```
 
-**Acessar:**
+**Access:**
 http://localhost:3000
 
-**Parar:**
+**Stop:**
 ```bash
 docker-compose down
 ```
 
-### 9.4 Estrutura de Diretorios
+### 9.4 Directory Structure
 
 ```
-projeto/
-├── public/
-│   └── archives/
-│       └── manifest.json
-├── src/
-│   ├── api/
-│   │   └── client.ts
-│   ├── components/
-│   │   └── Layout.tsx
-│   ├── lib/
-│   │   ├── similarity.ts
-│   │   └── xml-parser.ts
-│   ├── pages/
-│   │   ├── Dashboard.tsx
-│   │   ├── SearchPage.tsx
-│   │   ├── RecordDetails.tsx
-│   │   ├── DataManager.tsx
-│   │   └── AdminPage.tsx
-│   ├── test/
-│   ├── types/
-│   │   └── index.ts
-│   ├── App.tsx
-│   └── main.tsx
-├── docker-compose.yml
-├── Dockerfile
-├── package.json
-└── README.md
+project/
++-- public/
+|   +-- archives/
+|       +-- manifest.json
++-- src/
+|   +-- api/
+|   |   +-- client.ts
+|   +-- components/
+|   |   +-- Layout.tsx
+|   +-- lib/
+|   |   +-- similarity.ts
+|   |   +-- xml-parser.ts
+|   +-- pages/
+|   |   +-- Dashboard.tsx
+|   |   +-- SearchPage.tsx
+|   |   +-- RecordDetails.tsx
+|   |   +-- DataManager.tsx
+|   |   +-- AdminPage.tsx
+|   +-- test/
+|   +-- types/
+|   |   +-- index.ts
+|   +-- App.tsx
+|   +-- main.tsx
++-- docker-compose.yml
++-- Dockerfile
++-- package.json
++-- README.md
 ```
 
 ---
 
-## 10. Referencias
+## 10. References
 
 LEVENSTEIN, V. I. Binary codes capable of correcting deletions, insertions, and reversals. Soviet Physics Doklady, v. 10, n. 8, p. 707-710, 1965.
 
@@ -547,5 +547,5 @@ WINKLER, W. E. The state of record linkage and current research problems. U.S. B
 
 ---
 
-**Versao:** 1.0.0  
-**Ultima Atualizacao:** Dezembro 2024
+**Version:** 1.0.0
+**Last Update:** December 2024

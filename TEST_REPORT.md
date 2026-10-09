@@ -1,303 +1,303 @@
-# 🧪 Relatório Completo de Testes
+# Complete Test Report
 
-## 📊 Visão Geral
+## Overview
 
-O projeto UN Sanctions Screening System possui uma suíte completa de testes automatizados com **86+ testes** cobrindo toda a lógica de negócio, API e componentes React.
+The Name Matching System project has a complete automated test suite with **86+ tests** covering all business logic, API, and React components.
 
 ---
 
-## ✅ Status dos Testes
+## Test Status
 
 ### Build
 ```bash
-✓ Build concluído com sucesso
-✓ 1511 módulos transformados
-✓ Sem erros de TypeScript
+✓ Build completed successfully
+✓ 1511 modules transformed
+✓ No TypeScript errors
 ```
 
-### Testes Implementados
+### Implemented Tests
 ```bash
-✓ 5 arquivos de teste
-✓ 86+ testes individuais
-✓ 100% de cobertura da lógica crítica
+✓ 5 test files
+✓ 86+ individual tests
+✓ 100% coverage of critical logic
 ```
 
 ---
 
-## 📁 Arquivos de Teste Criados
+## Created Test Files
 
-### 1. `src/test/similarity.test.ts` (35 testes)
-**Motor de Similaridade - Lógica Core**
+### 1. `src/test/similarity.test.ts` (35 tests)
+**Similarity Engine - Core Logic**
 
-#### Testes de Normalização
-- ✅ Conversão para lowercase
-- ✅ Remoção de diacríticos (José → Jose, François → Francois)
-- ✅ Remoção de pontuação (O'Brien → obrien)
-- ✅ Normalização de espaços
-- ✅ Strings vazias
-- ✅ Nomes complexos com múltiplos caracteres especiais
+#### Normalization Tests
+- ✓ Conversion to lowercase
+- ✓ Diacritics removal (Jose -> Jose, Francois -> Francois)
+- ✓ Punctuation removal (O'Brien -> obrien)
+- ✓ Space normalization
+- ✓ Empty strings
+- ✓ Complex names with multiple special characters
 
-#### Testes de Tokenização
-- ✅ Divisão em tokens
-- ✅ Filtro de tokens vazios
-- ✅ Palavras únicas
-- ✅ Strings vazias
+#### Tokenization Tests
+- ✓ Split into tokens
+- ✓ Empty token filter
+- ✓ Single words
+- ✓ Empty strings
 
-#### Testes de Algoritmos
-- ✅ **Levenshtein** (10 testes)
-  - Strings idênticas (100%)
-  - Diferenças de case
-  - Diferenças de acentos
-  - Erros de digitação menores
-  - Nomes completamente diferentes
-  - Strings vazias
-  - Variantes de transliteração
+#### Algorithm Tests
+- ✓ **Levenshtein** (10 tests)
+  - Identical strings (100%)
+  - Case differences
+  - Accent differences
+  - Minor typos
+  - Completely different names
+  - Empty strings
+  - Transliteration variants
 
-- ✅ **Jaro-Winkler** (4 testes)
-  - Strings idênticas
-  - Bônus por prefixo comum
-  - Transposições
-  - Strings diferentes
+- ✓ **Jaro-Winkler** (4 tests)
+  - Identical strings
+  - Common prefix bonus
+  - Transpositions
+  - Different strings
 
-- ✅ **Token Similarity** (5 testes)
-  - Mesmos tokens em ordem diferente
-  - Correspondências parciais
-  - Tokens completamente diferentes
-  - Token único
-  - Nomes compostos
+- ✓ **Token Similarity** (5 tests)
+  - Same tokens in different order
+  - Partial matches
+  - Completely different tokens
+  - Single token
+  - Compound names
 
-- ✅ **Bigram Similarity** (4 testes)
-  - Strings idênticas
-  - Strings similares
-  - Strings muito diferentes
-  - Strings curtas
+- ✓ **Bigram Similarity** (4 tests)
+  - Identical strings
+  - Similar strings
+  - Very different strings
+  - Short strings
 
-#### Testes de Cálculo Combinado
-- ✅ Melhor score de todos os algoritmos
-- ✅ Verificação de aliases
-- ✅ Variantes de transliteração
-- ✅ Nomes não relacionados
-- ✅ Array de aliases vazio
-- ✅ Múltiplos aliases
+#### Combined Calculation Tests
+- ✓ Best score from all algorithms
+- ✓ Alias verification
+- ✓ Transliteration variants
+- ✓ Unrelated names
+- ✓ Empty alias array
+- ✓ Multiple aliases
 
-#### Testes de Rótulos
-- ✅ HIGH (≥85)
-- ✅ MEDIUM (≥65 e <85)
-- ✅ LOW (≥45 e <65)
-- ✅ INDETERMINATE (<45)
+#### Label Tests
+- ✓ HIGH (>=85)
+- ✓ MEDIUM (>=65 and <85)
+- ✓ LOW (>=45 and <65)
+- ✓ INDETERMINATE (<45)
 
-#### Testes do Mundo Real
-- ✅ Transliterações árabes (Mohamed/Mohammed/Muhammad)
-- ✅ Ordem de nomes chineses (Zhang Wei/Wei Zhang)
-- ✅ Nomes com títulos (Dr. John Smith)
-- ✅ Sobrenomes compostos (Garcia Lopez/García-López)
-- ✅ Nomes similares mas diferentes (John Smith/John Smythe)
-
----
-
-### 2. `src/test/api.test.ts` (30 testes)
-**Cliente API - Integração**
-
-#### searchRecords (14 testes)
-- ✅ Query vazia retorna resultados vazios
-- ✅ Query com menos de 2 caracteres
-- ✅ Encontra registros correspondentes
-- ✅ Resultados ordenados por score
-- ✅ Filtro por tipo INDIVIDUAL
-- ✅ Filtro por tipo ENTITY
-- ✅ Respeita filtro de score mínimo
-- ✅ Paginação funciona corretamente
-- ✅ Inclui análise de IA para scores altos
-- ✅ Inclui alias correspondente
-- ✅ Marca scores como experimentais
-- ✅ Reporta disponibilidade da IA
-- ✅ Mede tempo de busca
-- ✅ Retorna query correta na resposta
-
-#### getRecordById (5 testes)
-- ✅ Retorna registro para ID válido
-- ✅ Retorna null para ID inexistente
-- ✅ Registro inclui aliases
-- ✅ Registro inclui detalhes biográficos
-- ✅ Registro inclui programas de sanções
-
-#### getDashboardStats (4 testes)
-- ✅ Retorna estatísticas do dashboard
-- ✅ Inclui status de sincronização
-- ✅ Inclui status do Ollama
-- ✅ Inclui array de falhas recentes
-
-#### getSyncStatus (2 testes)
-- ✅ Retorna status de sincronização
-- ✅ Inclui informação da última sync
-
-#### getImportHistory (2 testes)
-- ✅ Retorna array de jobs de importação
-- ✅ Inclui detalhes do job
-
-#### triggerSync (1 teste)
-- ✅ Dispara sincronização e retorna job
-
-#### checkOllamaHealth (1 teste)
-- ✅ Retorna status de saúde do Ollama
+#### Real-World Tests
+- ✓ Arabic transliterations (Mohamed/Mohammed/Muhammad)
+- ✓ Chinese name order (Zhang Wei/Wei Zhang)
+- ✓ Names with titles (Dr. John Smith)
+- ✓ Compound surnames (Garcia Lopez/García-López)
+- ✓ Similar but different names (John Smith/John Smythe)
 
 ---
 
-### 3. `src/test/Layout.test.tsx` (6 testes)
-**Componente Layout - UI**
+### 2. `src/test/api.test.ts` (30 tests)
+**API Client - Integration**
 
-- ✅ Renderiza links de navegação (Dashboard, Search, Administration)
-- ✅ Renderiza título do app (UN Sanctions Screening)
-- ✅ Renderiza conteúdo filho
-- ✅ Renderiza disclaimer no footer
-- ✅ Mostra indicador "Local Mode"
-- ✅ Estrutura HTML correta
+#### searchRecords (14 tests)
+- ✓ Empty query returns empty results
+- ✓ Query with less than 2 characters
+- ✓ Finds matching records
+- ✓ Results sorted by score
+- ✓ Filter by type INDIVIDUAL
+- ✓ Filter by type ENTITY
+- ✓ Respects minimum score filter
+- ✓ Pagination works correctly
+- ✓ Includes AI analysis for high scores
+- ✓ Includes matching alias
+- ✓ Marks scores as experimental
+- ✓ Reports AI availability
+- ✓ Measures search time
+- ✓ Returns correct query in response
+
+#### getRecordById (5 tests)
+- ✓ Returns record for valid ID
+- ✓ Returns null for non-existent ID
+- ✓ Record includes aliases
+- ✓ Record includes biographical details
+- ✓ Record includes programs
+
+#### getDashboardStats (4 tests)
+- ✓ Returns dashboard statistics
+- ✓ Includes synchronization status
+- ✓ Includes Ollama status
+- ✓ Includes recent failures array
+
+#### getSyncStatus (2 tests)
+- ✓ Returns synchronization status
+- ✓ Includes last sync information
+
+#### getImportHistory (2 tests)
+- ✓ Returns array of import jobs
+- ✓ Includes job details
+
+#### triggerSync (1 test)
+- ✓ Triggers synchronization and returns job
+
+#### checkOllamaHealth (1 test)
+- ✓ Returns Ollama health status
 
 ---
 
-### 4. `src/test/Dashboard.test.tsx` (6 testes)
-**Página Dashboard - UI**
+### 3. `src/test/Layout.test.tsx` (6 tests)
+**Layout Component - UI**
 
-- ✅ Renderiza título "Dashboard"
-- ✅ Exibe cards de estatísticas (Total Records, Individuals, Entities, Data Freshness)
-- ✅ Exibe seção "AI Model Status"
-- ✅ Exibe seção "Synchronization"
-- ✅ Exibe seção "About This System"
-- ✅ Mostra estado de carregamento
-
----
-
-### 5. `src/test/SearchPage.test.tsx` (9 testes)
-**Página SearchPage - UI**
-
-- ✅ Renderiza título "Sanctions Screening"
-- ✅ Renderiza input de busca
-- ✅ Renderiza botão de busca
-- ✅ Renderiza filtro de tipo de registro
-- ✅ Renderiza slider de score mínimo
-- ✅ Mostra mensagem de estado inicial
-- ✅ Mostra erro de validação para query curta
-- ✅ Exibe opções de tipo de registro
-- ✅ Exibe aviso experimental
+- ✓ Renders navigation links (Dashboard, Search, Administration)
+- ✓ Renders app title (Name Matching System)
+- ✓ Renders child content
+- ✓ Renders footer disclaimer
+- ✓ Shows "Local Mode" indicator
+- ✓ Correct HTML structure
 
 ---
 
-## 🚀 Como Executar os Testes
+### 4. `src/test/Dashboard.test.tsx` (6 tests)
+**Dashboard Page - UI**
 
-### Opção 1: Script Automatizado
+- ✓ Renders title "Dashboard"
+- ✓ Displays statistics cards (Total Records, Individuals, Entities, Data Freshness)
+- ✓ Displays "AI Model Status" section
+- ✓ Displays "Synchronization" section
+- ✓ Displays "About This System" section
+- ✓ Shows loading state
+
+---
+
+### 5. `src/test/SearchPage.test.tsx` (9 tests)
+**SearchPage - UI**
+
+- ✓ Renders title "Name Matching"
+- ✓ Renders search input
+- ✓ Renders search button
+- ✓ Renders record type filter
+- ✓ Renders minimum score slider
+- ✓ Shows initial state message
+- ✓ Shows validation error for short query
+- ✓ Displays record type options
+- ✓ Displays experimental warning
+
+---
+
+## How to Run Tests
+
+### Option 1: Automated Script
 ```bash
 chmod +x scripts/run-tests.sh
 ./scripts/run-tests.sh
 ```
 
-### Opção 2: Comando Direto
+### Option 2: Direct Command
 ```bash
 npm test
 ```
 
-### Opção 3: Modo Watch (Desenvolvimento)
+### Option 3: Watch Mode (Development)
 ```bash
 npm run test:watch
 ```
 
-### Opção 4: Com Cobertura
+### Option 4: With Coverage
 ```bash
 npm run test:coverage
 ```
 
-### Opção 5: Testes Específicos
+### Option 5: Specific Tests
 ```bash
-# Apenas testes de similaridade
+# Only similarity tests
 npx vitest run src/test/similarity.test.ts
 
-# Apenas testes de API
+# Only API tests
 npx vitest run src/test/api.test.ts
 
-# Apenas testes de componentes
+# Only component tests
 npx vitest run src/test/*.test.tsx
 ```
 
 ---
 
-## 📈 Métricas de Qualidade
+## Quality Metrics
 
-### Cobertura por Categoria
+### Coverage by Category
 
-| Categoria | Testes | Cobertura | Status |
-|-----------|--------|-----------|--------|
-| Motor de Similaridade | 35 | 100% | ✅ Completo |
-| Cliente API | 30 | 100% | ✅ Completo |
-| Componentes React | 21 | 80% | ✅ Bom |
-| **Total** | **86+** | **95%** | ✅ **Excelente** |
+| Category | Tests | Coverage | Status |
+|----------|-------|----------|--------|
+| Similarity Engine | 35 | 100% | ✓ Complete |
+| API Client | 30 | 100% | ✓ Complete |
+| React Components | 21 | 80% | ✓ Good |
+| **Total** | **86+** | **95%** | ✓ **Excellent** |
 
-### Tempo de Execução
-- **Total:** ~2-3 segundos
-- **Por arquivo:** ~0.5 segundos
-- **Por teste:** ~20-30ms
+### Execution Time
+- **Total:** ~2-3 seconds
+- **Per file:** ~0.5 seconds
+- **Per test:** ~20-30ms
 
-### Qualidade dos Testes
-- ✅ **Isolamento:** Cada teste é independente
-- ✅ **Determinismo:** Resultados consistentes
-- ✅ **Legibilidade:** Nomes descritivos
-- ✅ **Manutenibilidade:** Estrutura clara
-- ✅ **Cobertura:** Casos de erro incluídos
-
----
-
-## 🎯 Cenários Testados
-
-### Nomes e Transliterações
-```typescript
-// Árabe
-'Mohamed' ↔ 'Mohammed' → score > 70
-'Mohamed' ↔ 'Muhammad' → score > 70
-'Ahmed' ↔ 'Ahmad' → score > 70
-
-// Chinês (ordem invertida)
-'Zhang Wei' ↔ 'Wei Zhang' → score = 100
-
-// Europeu (acentos)
-'José' ↔ 'Jose' → score = 100
-'François' ↔ 'Francois' → score = 100
-
-// Compostos
-'Garcia Lopez' ↔ 'García-López' → score > 80
-```
-
-### Busca e Filtros
-```typescript
-// Busca básica
-searchRecords('John') → encontra múltiplos resultados
-
-// Filtro por tipo
-searchRecords('John', 'INDIVIDUAL') → apenas indivíduos
-searchRecords('Global', 'ENTITY') → apenas entidades
-
-// Filtro por score
-searchRecords('John', undefined, 20, 1, 50) → score >= 50
-
-// Paginação
-searchRecords('a', undefined, 2, 1) → página 1
-searchRecords('a', undefined, 2, 2) → página 2
-```
-
-### Componentes React
-```typescript
-// Renderização
-<SearchPage /> → mostra input, botão, filtros
-
-// Validação
-input = 'J' + click search → mostra erro "mínimo 2 caracteres"
-
-// Estados
-loading → mostra spinner
-error → mostra mensagem de erro
-empty → mostra "No matches found"
-```
+### Test Quality
+- ✓ **Isolation:** Each test is independent
+- ✓ **Determinism:** Consistent results
+- ✓ **Readability:** Descriptive names
+- ✓ **Maintainability:** Clear structure
+- ✓ **Coverage:** Error cases included
 
 ---
 
-## 🔧 Ferramentas Utilizadas
+## Tested Scenarios
+
+### Names and Transliterations
+```typescript
+// Arabic
+'Mohamed' <-> 'Mohammed' -> score > 70
+'Mohamed' <-> 'Muhammad' -> score > 70
+'Ahmed' <-> 'Ahmad' -> score > 70
+
+// Chinese (reversed order)
+'Zhang Wei' <-> 'Wei Zhang' -> score = 100
+
+// European (accents)
+'Jose' <-> 'Jose' -> score = 100
+'Francois' <-> 'Francois' -> score = 100
+
+// Compound
+'Garcia Lopez' <-> 'García-López' -> score > 80
+```
+
+### Search and Filters
+```typescript
+// Basic search
+searchRecords('John') -> finds multiple results
+
+// Filter by type
+searchRecords('John', 'INDIVIDUAL') -> only individuals
+searchRecords('Global', 'ENTITY') -> only entities
+
+// Filter by score
+searchRecords('John', undefined, 20, 1, 50) -> score >= 50
+
+// Pagination
+searchRecords('a', undefined, 2, 1) -> page 1
+searchRecords('a', undefined, 2, 2) -> page 2
+```
+
+### React Components
+```typescript
+// Rendering
+<SearchPage /> -> shows input, button, filters
+
+// Validation
+input = 'J' + click search -> shows error "minimum 2 characters"
+
+// States
+loading -> shows spinner
+error -> shows error message
+empty -> shows "No matches found"
+```
+
+---
+
+## Tools Used
 
 ```json
 {
@@ -311,7 +311,7 @@ empty → mostra "No matches found"
 
 ---
 
-## 📊 Resultados Esperados
+## Expected Results
 
 ```bash
 $ npm test
@@ -347,48 +347,48 @@ Time  2.34s
 
 ---
 
-## ✅ Checklist de Qualidade
+## Quality Checklist
 
-- [x] Todos os testes passando
-- [x] Build sem erros
-- [x] TypeScript sem erros
-- [x] Cobertura de lógica crítica (100%)
-- [x] Cobertura de API (100%)
-- [x] Cobertura de componentes (80%)
-- [x] Testes de erro e edge cases
-- [x] Dados realistas
-- [x] Nomes descritivos
-- [x] Documentação completa
-
----
-
-## 🎉 Conclusão
-
-O projeto possui uma suíte de testes **robusta e completa** que garante:
-
-1. **Corretude:** Lógica de similaridade funcionando conforme esperado
-2. **Confiabilidade:** API retornando dados corretos
-3. **Usabilidade:** Componentes renderizando corretamente
-4. **Manutenibilidade:** Testes fáceis de entender e modificar
-5. **Qualidade:** Cobertura abrangente de cenários
-
-**Status: ✅ PRONTO PARA PRODUÇÃO**
+- [x] All tests passing
+- [x] Build without errors
+- [x] TypeScript without errors
+- [x] Critical logic coverage (100%)
+- [x] API coverage (100%)
+- [x] Component coverage (80%)
+- [x] Error and edge case tests
+- [x] Realistic data
+- [x] Descriptive names
+- [x] Complete documentation
 
 ---
 
-## 📚 Próximos Passos (Opcional)
+## Conclusion
 
-Para levar os testes ao próximo nível:
+The project has a **robust and complete** test suite that ensures:
 
-1. **Testes E2E** com Playwright ou Cypress
-2. **Testes de Performance** com k6 ou Artillery
-3. **Testes de Acessibilidade** com axe-core
-4. **Testes de Segurança** com OWASP ZAP
-5. **Testes de Integração** com backend real
-6. **Cobertura de 100%** em todos os componentes
+1. **Correctness:** Similarity logic working as expected
+2. **Reliability:** API returning correct data
+3. **Usability:** Components rendering correctly
+4. **Maintainability:** Tests easy to understand and modify
+5. **Quality:** Comprehensive scenario coverage
+
+**Status: READY FOR PRODUCTION**
 
 ---
 
-**Criado em:** 2024  
-**Versão:** 1.0  
-**Status:** ✅ Completo e Funcional
+## Next Steps (Optional)
+
+To take tests to the next level:
+
+1. **E2E Tests** with Playwright or Cypress
+2. **Performance Tests** with k6 or Artillery
+3. **Accessibility Tests** with axe-core
+4. **Security Tests** with OWASP ZAP
+5. **Integration Tests** with real backend
+6. **100% Coverage** on all components
+
+---
+
+**Created in:** 2024
+**Version:** 1.0
+**Status:** Complete and Functional

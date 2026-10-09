@@ -1,150 +1,150 @@
-# 🚀 Guia Rápido - UN Sanctions Screening System
+# Quick Start Guide - Name Matching System
 
-## ⚡ Início Rápido (3 passos)
+## Quick Start (3 steps)
 
-### 1️⃣ Instalar dependências
+### Step 1: Install dependencies
 ```bash
 npm install
 ```
 
-### 2️⃣ Executar em modo desenvolvimento
+### Step 2: Run in development mode
 ```bash
 npm run dev
 ```
 
-### 3️⃣ Abrir no navegador
-Acesse: **http://localhost:3000**
+### Step 3: Open in browser
+Access: **http://localhost:3000**
 
 ---
 
-## 🐳 Usando Docker
+## Using Docker
 
-### Iniciar com Docker
+### Start with Docker
 ```bash
 docker-compose up -d
 ```
 
-### Acessar
-Abra: **http://localhost:3000**
+### Access
+Open: **http://localhost:3000**
 
-### Parar
+### Stop
 ```bash
 docker-compose down
 ```
 
 ---
 
-## 🧪 Executar Testes
+## Running Tests
 
 ```bash
-# Todos os testes
+# All tests
 npm test
 
-# Modo watch
+# Watch mode
 npm run test:watch
 
-# Com cobertura
+# With coverage
 npm run test:coverage
 ```
 
 ---
 
-## 📦 Build para Produção
+## Production Build
 
 ```bash
 npm run build
 ```
 
-Os arquivos serão gerados em `dist/`
+Files will be generated in `dist/`
 
 ---
 
-## 📁 Estrutura do Projeto
+## Project Structure
 
 ```
-UN-Sanctions-Screening-System/
-├── src/                    # Código fonte React
-│   ├── api/               # Cliente API e dados mock
-│   ├── components/        # Componentes reutilizáveis
-│   ├── pages/             # Páginas da aplicação
-│   ├── lib/               # Lógica de similaridade
-│   ├── types/             # Tipos TypeScript
-│   └── test/              # Testes automatizados
-├── backend/               # Backend Java (incompleto)
-├── docker-compose.yml     # Configuração Docker
-├── package.json           # Dependências
-└── README.md              # Documentação principal
+name-matching-system/
++-- src/                    # React source code
+|   +-- api/               # API client and mock data
+|   +-- components/        # Reusable components
+|   +-- pages/             # Application pages
+|   +-- lib/               # Similarity logic
+|   +-- types/             # TypeScript types
+|   +-- test/              # Automated tests
++-- backend/               # Java backend (incomplete)
++-- docker-compose.yml     # Docker configuration
++-- package.json           # Dependencies
++-- README.md              # Main documentation
 ```
 
 ---
 
-## 🎯 Funcionalidades
+## Features
 
-✅ **Dashboard** - Visão geral do sistema  
-✅ **Busca** - Screening de nomes com IA local  
-✅ **Detalhes** - Informações completas de registros  
-✅ **Administração** - Gerenciamento de sincronização  
-
----
-
-## 🔍 Testar a Busca
-
-Experimente buscar por:
-- `John` - Múltiplas correspondências
-- `Mohammed` - Variantes de transliteração
-- `Zhang Wei` - Nomes em ordem diferente
-- `Global Trading` - Entidades
+- **Dashboard** - System overview
+- **Search** - Name matching with local AI
+- **Details** - Complete record information
+- **Administration** - Synchronization management
 
 ---
 
-## 📚 Documentação Completa
+## Testing the Search
 
-- [README.md](./README.md) - Documentação principal
-- [TESTING.md](./TESTING.md) - Guia de testes
-- [DOCKER.md](./DOCKER.md) - Guia Docker
-- [TEST_REPORT.md](./TEST_REPORT.md) - Relatório de testes
+Try searching for:
+- `John` - Multiple matches
+- `Mohammed` - Transliteration variants
+- `Zhang Wei` - Names in different order
+- `Global Trading` - Entities
 
 ---
 
-## ⚙️ Requisitos
+## Complete Documentation
 
-- Node.js 18+ 
+- [README.md](./README.md) - Main documentation
+- [TESTING.md](./TESTING.md) - Testing guide
+- [DOCKER.md](./DOCKER.md) - Docker guide
+- [TEST_REPORT.md](./TEST_REPORT.md) - Test report
+
+---
+
+## Requirements
+
+- Node.js 18+
 - npm 9+
-- Docker 20.10+ (opcional)
+- Docker 20.10+ (optional)
 
 ---
 
-## 🆘 Problemas Comuns
+## Common Issues
 
-### Porta 3000 em uso
+### Port 3000 in use
 ```bash
-# Use outra porta
+# Use another port
 npm run dev -- --port 3001
 ```
 
-### Dependências desatualizadas
+### Outdated dependencies
 ```bash
 rm -rf node_modules package-lock.json
 npm install
 ```
 
-### Docker não funciona
+### Docker not working
 ```bash
-# Reconstruir do zero
+# Rebuild from scratch
 docker-compose down
 docker-compose up -d --build
 ```
 
 ---
 
-## 📞 Suporte
+## Support
 
-1. Verifique os logs: `npm run dev` ou `docker-compose logs`
-2. Consulte a documentação em `DOCKER.md` ou `TESTING.md`
-3. Verifique se atende aos requisitos
+1. Check logs: `npm run dev` or `docker-compose logs`
+2. Consult documentation in `DOCKER.md` or `TESTING.md`
+3. Verify requirements are met
 
 ---
 
-**Pronto para usar!** 🎉
+**Ready to use!**
 
-Acesse http://localhost:3000 e comece a testar o sistema de screening.
+Access http://localhost:3000 and start testing the matching system.

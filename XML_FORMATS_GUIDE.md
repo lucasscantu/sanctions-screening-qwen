@@ -1,43 +1,43 @@
-# 📚 Guia de Formatos XML Suportados
+# Supported XML Formats Guide
 
-O sistema de triagem de sanções agora suporta **múltiplos arquivos XML** e **dois formatos diferentes**.
-
----
-
-## 🎯 Novas Funcionalidades
-
-✅ **Suporte ao formato oficial da ONU** (tags em MAIÚSCULAS)  
-✅ **Suporte ao formato simplificado** (tags em minúsculas)  
-✅ **Carregamento de múltiplos arquivos XML**  
-✅ **Detecção automática de formato**  
-✅ **Combinação de todos os registros**  
+The name matching system now supports **multiple XML files** and **two different formats**.
 
 ---
 
-## 📂 Estrutura de Arquivos
+## New Features
+
+- **Support for official format** (tags in UPPERCASE)
+- **Support for simplified format** (tags in lowercase)
+- **Loading of multiple XML files**
+- **Automatic format detection**
+- **Combination of all records**
+
+---
+
+## File Structure
 
 ```
 public/archives/
-├── manifest.json                    ← Lista de arquivos a carregar
-├── sanctions-list.xml               ← Formato simplificado
-├── un-official-sample.xml           ← Formato oficial ONU
-├── seu-arquivo-1.xml                ← Adicione quantos quiser
-└── seu-arquivo-2.xml
++-- manifest.json                    <- List of files to load
++-- data-list.xml                    <- Simplified format
++-- official-sample.xml              <- Official format
++-- your-file-1.xml                  <- Add as many as you want
++-- your-file-2.xml
 ```
 
 ---
 
-## 📋 Formato 1: Oficial da ONU
+## Format 1: Official Format
 
-Este é o formato usado pela lista consolidada do Conselho de Segurança da ONU.
+This is the format used by official consolidated lists.
 
-### Características
-- Tags em **MAIÚSCULAS**: `<INDIVIDUAL>`, `<ENTITY>`, `<FIRST_NAME>`, etc.
-- Nomes separados em partes: `FIRST_NAME`, `SECOND_NAME`, `THIRD_NAME`, `FOURTH_NAME`
-- Aliases em `<INDIVIDUAL_ALIAS>` com `<QUALITY>` e `<ALIAS_NAME>`
-- Datas em `<INDIVIDUAL_DATE_OF_BIRTH>` com `<TYPE_OF_DATE>` e `<DATE>`
+### Characteristics
+- Tags in **UPPERCASE**: `<INDIVIDUAL>`, `<ENTITY>`, `<FIRST_NAME>`, etc.
+- Names separated into parts: `FIRST_NAME`, `SECOND_NAME`, `THIRD_NAME`, `FOURTH_NAME`
+- Aliases in `<INDIVIDUAL_ALIAS>` with `<QUALITY>` and `<ALIAS_NAME>`
+- Dates in `<INDIVIDUAL_DATE_OF_BIRTH>` with `<TYPE_OF_DATE>` and `<DATE>`
 
-### Exemplo Completo
+### Complete Example
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -113,51 +113,51 @@ Este é o formato usado pela lista consolidada do Conselho de Segurança da ONU.
 </DATAEXPORT>
 ```
 
-### Campos Suportados (Formato ONU)
+### Supported Fields (Official Format)
 
 #### INDIVIDUAL
-- `DATAID` - Identificador único
-- `FIRST_NAME`, `SECOND_NAME`, `THIRD_NAME`, `FOURTH_NAME` - Partes do nome
-- `UN_LIST_TYPE` - Tipo de lista (Al-Qaida, Taliban, etc.)
-- `REFERENCE_NUMBER` - Número de referência oficial
-- `LISTED_ON` - Data de inclusão
-- `COMMENTS1` - Comentários adicionais
-- `NATIONALITY/VALUE` - Nacionalidade
-- `INDIVIDUAL_ALIAS` - Aliases (múltiplos)
-  - `QUALITY` - Qualidade (Good, Low, etc.)
-  - `ALIAS_NAME` - Nome do alias
-- `INDIVIDUAL_DATE_OF_BIRTH` - Data de nascimento
+- `DATAID` - Unique identifier
+- `FIRST_NAME`, `SECOND_NAME`, `THIRD_NAME`, `FOURTH_NAME` - Name parts
+- `UN_LIST_TYPE` - List type
+- `REFERENCE_NUMBER` - Official reference number
+- `LISTED_ON` - Listing date
+- `COMMENTS1` - Additional comments
+- `NATIONALITY/VALUE` - Nationality
+- `INDIVIDUAL_ALIAS` - Aliases (multiple)
+  - `QUALITY` - Quality (Good, Low, etc.)
+  - `ALIAS_NAME` - Alias name
+- `INDIVIDUAL_DATE_OF_BIRTH` - Date of birth
   - `TYPE_OF_DATE` - EXACT, YEAR, FROM, BETWEEN
-  - `DATE` - Data ou ano
-- `INDIVIDUAL_PLACE_OF_BIRTH` - Local de nascimento
+  - `DATE` - Date or year
+- `INDIVIDUAL_PLACE_OF_BIRTH` - Place of birth
   - `COUNTRY`, `CITY`, `STATE_PROVINCE`
-- `INDIVIDUAL_DOCUMENT` - Documentos (múltiplos)
+- `INDIVIDUAL_DOCUMENT` - Documents (multiple)
   - `TYPE_OF_DOCUMENT`, `NUMBER`, `ISSUING_COUNTRY`
-- `INDIVIDUAL_ADDRESS` - Endereços (múltiplos)
+- `INDIVIDUAL_ADDRESS` - Addresses (multiple)
   - `COUNTRY`, `CITY`, `STREET`, `NOTE`
 
 #### ENTITY
-- Mesmos campos básicos que INDIVIDUAL
-- `ENTITY_ALIAS` em vez de `INDIVIDUAL_ALIAS`
-- `ENTITY_ADDRESS` em vez de `INDIVIDUAL_ADDRESS`
-- Sem data de nascimento ou documentos
+- Same basic fields as INDIVIDUAL
+- `ENTITY_ALIAS` instead of `INDIVIDUAL_ALIAS`
+- `ENTITY_ADDRESS` instead of `INDIVIDUAL_ADDRESS`
+- No date of birth or documents
 
 ---
 
-## 📋 Formato 2: Simplificado
+## Format 2: Simplified Format
 
-Formato mais simples e legível, ideal para listas customizadas.
+Simpler and more readable format, ideal for custom lists.
 
-### Características
-- Tags em **minúsculas**: `<individual>`, `<entity>`, `<primaryName>`, etc.
-- Nome completo em um único campo: `<primaryName>`
-- Estrutura mais compacta
+### Characteristics
+- Tags in **lowercase**: `<individual>`, `<entity>`, `<primaryName>`, etc.
+- Full name in a single field: `<primaryName>`
+- More compact structure
 
-### Exemplo Completo
+### Complete Example
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<sanctionsList>
+<dataList>
   <individual id="REG-001" dateListed="2020-01-01" lastUpdate="2024-01-15">
     <primaryName>John Alexander Smith</primaryName>
     <alias quality="good">Johnny Smith</alias>
@@ -183,235 +183,196 @@ Formato mais simples e legível, ideal para listas customizadas.
       Listed for regulatory violations
     </program>
   </entity>
-</sanctionsList>
+</dataList>
 ```
 
-### Campos Suportados (Formato Simplificado)
+### Supported Fields (Simplified Format)
 
 #### individual
-- Atributos: `id`, `dateListed`, `lastUpdate`
-- `<primaryName>` - Nome completo
-- `<alias>` - Aliases (múltiplos, atributo opcional `quality`)
-- `<dateOfBirth>` - Data de nascimento (atributo opcional `precision`)
-- `<placeOfBirth>` - Local de nascimento
-- `<nationality>` - Nacionalidade
-- `<gender>` - Gênero (M/F)
-- `<document>` - Documentos (atributos: `type`, `number`, `issuingCountry`)
-- `<address>` - Endereços (múltiplos)
-- `<program>` - Programas de sanção (atributos: `name`, `reference`)
+- Attributes: `id`, `dateListed`, `lastUpdate`
+- `<primaryName>` - Full name
+- `<alias>` - Aliases (multiple, optional attribute `quality`)
+- `<dateOfBirth>` - Date of birth (optional attribute `precision`)
+- `<placeOfBirth>` - Place of birth
+- `<nationality>` - Nationality
+- `<gender>` - Gender (M/F)
+- `<document>` - Documents (attributes: `type`, `number`, `issuingCountry`)
+- `<address>` - Addresses (multiple)
+- `<program>` - Programs (attributes: `name`, `reference`)
 
 #### entity
-- Atributos: `id`, `dateListed`, `lastUpdate`
-- `<primaryName>` - Nome completo
-- `<alias>` - Aliases (múltiplos)
-- `<address>` - Endereços (múltiplos)
-- `<program>` - Programas de sanção
+- Attributes: `id`, `dateListed`, `lastUpdate`
+- `<primaryName>` - Full name
+- `<alias>` - Aliases (multiple)
+- `<address>` - Addresses (multiple)
+- `<program>` - Programs
 
 ---
 
-## 🔄 Como Usar Múltiplos Arquivos
+## How to Use Multiple Files
 
-### Passo 1: Adicionar arquivos XML
+### Step 1: Add XML files
 
-Coloque seus arquivos XML na pasta `public/archives/`:
+Place your XML files in the `public/archives/` folder:
 
 ```bash
-# Exemplo
-cp lista-oficial-onu.xml public/archives/
-cp lista-ofac.xml public/archives/
-cp lista-eu.xml public/archives/
-cp minha-lista-custom.xml public/archives/
+# Example
+cp official-list.xml public/archives/
+cp custom-list.xml public/archives/
 ```
 
-### Passo 2: Atualizar o manifesto
+### Step 2: Update the manifest
 
-Edite o arquivo `public/archives/manifest.json`:
+Edit the file `public/archives/manifest.json`:
 
 ```json
 {
   "files": [
-    "sanctions-list.xml",
-    "un-official-sample.xml",
-    "lista-oficial-onu.xml",
-    "lista-ofac.xml",
-    "lista-eu.xml",
-    "minha-lista-custom.xml"
+    "data-list.xml",
+    "official-list.xml",
+    "custom-list.xml"
   ],
-  "description": "Lista de arquivos XML de sanções",
+  "description": "List of XML files to load",
   "lastUpdated": "2024-12-01"
 }
 ```
 
-### Passo 3: Recarregar os dados
+### Step 3: Reload data
 
-1. Acesse a página **"Data"** no sistema
-2. Clique em **"Recarregar Dados"**
-3. O sistema carregará todos os arquivos listados no manifesto
+1. Access the **"Data"** page in the system
+2. Click **"Reload Data"**
+3. The system will load all files listed in the manifest
 
-### Passo 4: Verificar
+### Step 4: Verify
 
-O Dashboard mostrará o total de registros de **todos os arquivos combinados**.
+The Dashboard will show the total of records from **all combined files**.
 
 ---
 
-## 🔍 Detecção Automática de Formato
+## Automatic Format Detection
 
-O sistema detecta automaticamente qual formato cada arquivo usa:
+The system automatically detects which format each file uses:
 
 ```typescript
-// Formato oficial ONU detectado por tags em MAIÚSCULAS
+// Official format detected by UPPERCASE tags
 if (xmlContent.includes('<INDIVIDUAL>') || xmlContent.includes('<ENTITY>')) {
-  return 'UN_OFFICIAL';
+  return 'OFFICIAL';
 }
 
-// Formato simplificado detectado por tags em minúsculas
+// Simplified format detected by lowercase tags
 if (xmlContent.includes('<individual>') || xmlContent.includes('<entity>')) {
-  return 'SIMPLE';
+  return 'SIMPLIFIED';
 }
 ```
 
-Você pode **misturar formatos** na mesma pasta! O sistema processa cada arquivo corretamente.
+You can **mix formats** in the same folder! The system processes each file correctly.
 
 ---
 
-## 📊 Exemplos de Uso
+## Usage Examples
 
-### Exemplo 1: Lista Oficial da ONU
+### Example 1: Official List
 
-Baixe o XML oficial de: https://scsanctions.un.org/resources/xml/en/consolidated_list.xml
+Download the official XML and save as `public/archives/official-list.xml`, then add to manifest.
 
-Salve como `public/archives/un-consolidated-list.xml` e adicione ao manifesto.
+### Example 2: Custom List
 
-### Exemplo 2: Lista OFAC (EUA)
-
-Converta a lista SDN da OFAC para o formato XML e salve em `public/archives/ofac-sdn.xml`.
-
-### Exemplo 3: Lista da UE
-
-Baixe o XML da UE e salve em `public/archives/eu-sanctions.xml`.
-
-### Exemplo 4: Lista Customizada
-
-Crie sua própria lista no formato simplificado:
+Create your own list in simplified format:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<sanctionsList>
+<dataList>
   <individual id="CUSTOM-001" dateListed="2024-01-01">
-    <primaryName>João da Silva</primaryName>
-    <alias quality="good">João Silva</alias>
-    <nationality>Brasileiro</nationality>
-    <program name="Lista Interna">Inadimplência grave</program>
+    <primaryName>John Doe</primaryName>
+    <alias quality="good">Johnny Doe</alias>
+    <nationality>American</nationality>
+    <program name="Internal List">Non-compliance</program>
   </individual>
-</sanctionsList>
+</dataList>
 ```
 
 ---
 
-## 🎯 Como o Sistema Processa os Dados
+## How the System Processes Data
 
-1. **Leitura do Manifesto**: Lê `manifest.json` para saber quais arquivos carregar
-2. **Carregamento Sequencial**: Carrega cada arquivo XML listado
-3. **Detecção de Formato**: Identifica automaticamente o formato de cada arquivo
-4. **Parsing**: Converte XML em objetos TypeScript
-5. **Combinação**: Junta todos os registros em uma única lista
-6. **Cache**: Mantém em memória para buscas rápidas
-7. **Busca**: Pesquisa em todos os registros combinados
+1. **Reading Manifest**: Reads `manifest.json` to know which files to load
+2. **Sequential Loading**: Loads each listed XML file
+3. **Format Detection**: Automatically identifies the format of each file
+4. **Parsing**: Converts XML to TypeScript objects
+5. **Combination**: Joins all records into a single list
+6. **Cache**: Keeps in memory for fast searches
+7. **Search**: Searches all combined records
 
 ---
 
-## ⚠️ Considerações Importantes
+## Important Considerations
 
-### IDs Únicos
-- O sistema gera IDs únicos baseados em `DATAID` ou `REFERENCE_NUMBER`
-- Se houver duplicatas, os registros serão sobrescritos
-- Use IDs únicos em cada arquivo
+### Unique IDs
+- System generates unique IDs based on `DATAID` or `REFERENCE_NUMBER`
+- If there are duplicates, records will be overwritten
+- Use unique IDs in each file
 
 ### Performance
-- Arquivos muito grandes (>10MB) podem causar lentidão
-- Recomenda-se dividir listas grandes em múltiplos arquivos
-- O sistema carrega todos os dados na memória
+- Very large files (>10MB) may cause slowness
+- Recommended to divide large lists into multiple files
+- System loads all data into memory
 
-### Validação
-- XMLs mal formados são ignorados (com aviso no console)
-- Campos obrigatórios ausentes resultam em registros incompletos
-- O sistema é tolerante a dados faltantes
-
----
-
-## 🧪 Testando o Sistema
-
-### Teste 1: Formato Oficial ONU
-
-Busque por: `ABD AL-RAHMAN`  
-Resultado esperado: Encontra "ABD AL-RAHMAN KHALAF UBAYD JUDAY AL-ANIZI"
-
-### Teste 2: Formato Simplificado
-
-Busque por: `John`  
-Resultado esperado: Encontra "John Alexander Smith"
-
-### Teste 3: Transliteração
-
-Busque por: `Mohammed`  
-Resultado esperado: Encontra variações como "MOHAMMED IBRAHIM AL-SHAMMARI"
-
-### Teste 4: Ordem de Nomes
-
-Busque por: `Wei Zhang`  
-Resultado esperado: Encontra "ZHANG WEI" (ordem invertida)
+### Validation
+- Malformed XMLs are ignored (with console warning)
+- Missing required fields result in incomplete records
+- System is tolerant to missing data
 
 ---
 
-## 📚 Recursos Adicionais
+## Troubleshooting
 
-- [XML_GUIDE.md](./XML_GUIDE.md) - Guia original (formato simplificado)
-- [README.md](./README.md) - Documentação principal
-- [TESTING.md](./TESTING.md) - Guia de testes
+### Problem: File is not loaded
 
----
+**Solution:**
+1. Check if file is in `public/archives/`
+2. Check if it's listed in `manifest.json`
+3. Check if XML is valid (use online validator)
+4. Open browser console to see errors
 
-## 🆘 Troubleshooting
+### Problem: Records do not appear
 
-### Problema: Arquivo não é carregado
+**Solution:**
+1. Click "Reload Data" on Data page
+2. Clear browser cache (Ctrl+Shift+R)
+3. Check if XML format is correct
+4. Check logs in console
 
-**Solução:**
-1. Verifique se o arquivo está em `public/archives/`
-2. Verifique se está listado em `manifest.json`
-3. Verifique se o XML é válido (use um validador online)
-4. Abra o console do navegador para ver erros
+### Problem: Search does not find results
 
-### Problema: Registros não aparecem
-
-**Solução:**
-1. Clique em "Recarregar Dados" na página Data
-2. Limpe o cache do navegador (Ctrl+Shift+R)
-3. Verifique se o formato do XML está correto
-4. Verifique os logs no console
-
-### Problema: Busca não encontra resultados
-
-**Solução:**
-1. Verifique se os dados foram carregados (Dashboard mostra total)
-2. Tente buscar por parte do nome
-3. Reduza o score mínimo na busca
-4. Verifique a ortografia
+**Solution:**
+1. Check if data was loaded (Dashboard shows total)
+2. Try searching for part of the name
+3. Reduce minimum score in search
+4. Check spelling
 
 ---
 
-## ✅ Status
+## Additional Resources
+
+- [XML_GUIDE.md](./XML_GUIDE.md) - Original guide (simplified format)
+- [README.md](./README.md) - Main documentation
+- [TESTING.md](./TESTING.md) - Testing guide
+
+---
+
+## Status
 
 ```
-✅ Formato Oficial ONU: Suportado
-✅ Formato Simplificado: Suportado
-✅ Múltiplos Arquivos: Suportado
-✅ Detecção Automática: Funcionando
-✅ Combinação de Dados: Funcionando
-✅ Build: Sucesso
+✓ Official Format: Supported
+✓ Simplified Format: Supported
+✓ Multiple Files: Supported
+✓ Automatic Detection: Working
+✓ Data Combination: Working
+✓ Build: Success
 ```
 
 ---
 
-**Pronto para usar!** 🎉
+**Ready to use!**
 
-Agora você pode carregar quantos arquivos XML quiser, nos dois formatos suportados, e o sistema combinará todos os dados para busca unificada.
+Now you can load as many XML files as you want, in both supported formats, and the system will combine all data for unified search.
