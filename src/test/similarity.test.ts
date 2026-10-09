@@ -154,9 +154,9 @@ describe('bigramSimilarity', () => {
   });
 
   it('should handle short strings', () => {
-    // Single character strings have no bigrams
+    // Single character identical strings return 100 (exact match)
     const score = bigramSimilarity('J', 'J');
-    expect(score).toBe(0);
+    expect(score).toBe(100);
   });
 });
 
