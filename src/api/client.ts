@@ -1,16 +1,20 @@
 import { SearchResponse, SearchResult, SanctionedRecord, DashboardStats, SyncStatus, ImportJob } from '../types';
 import { calculateSimilarity, getScoreLabel } from '../lib/similarity';
-import { loadAllSanctionsXML } from '../lib/xml-parser';
+import { loadAllSanctionsXML, SanctionsXMLParser } from '../lib/xml-parser';
 
 // Cache dos registros carregados do XML
 let cachedRecords: SanctionedRecord[] | null = null;
 
+// Registros carregados via upload (na sessão atual)
+let uploadedRecords: SanctionedRecord[] = [];
+
 /**
- * Carrega TODOS os registros dos XMLs da pasta archives/ (com cache)
+ * Carrega registros do XML (com cache)
  */
 async function getRecords(): Promise<SanctionedRecord[]> {
   if (!cachedRecords) {
-    cachedRecords = await loadAllSanctionsXML();
+    const fileRecords = await loadAllSanctionsXML();
+    cachedRecords = [...fileRecords, ...uploadedRecords];
   }
   return cachedRecords;
 }
@@ -19,6 +23,29 @@ async function getRecords(): Promise<SanctionedRecord[]> {
  * Limpa o cache de registros
  */
 export function clearRecordsCache(): void {
+  cachedRecords = null;
+}
+
+/**
+ * Adiciona registros via upload de arquivo XML
+ */
+export function addUploadedRecords(records: SanctionedRecord[]): void {
+  uploadedRecords = [...uploadedRecords, ...records];
+  cachedRecords = null; // Invalida cache para recarregar
+}
+
+/**
+ * Carrega arquivo XML a partir de string de conteúdo
+ */
+export function parseXMLContent(xmlContent: string): SanctionedRecord[] {
+  return SanctionsXMLParser.parse(xmlContent);
+}
+
+/**
+ * Limpa todos os registros carregados via upload
+ */
+export function clearUploadedRecords(): void {
+  uploadedRecords = [];
   cachedRecords = null;
 }
 
@@ -116,7 +143,6 @@ export async function searchRecords(
   const startTime = Date.now();
   const records = await getRecords();
   
-  // Se não há dados carregados, retorna vazio
   if (records.length === 0) {
     return {
       query: name,
@@ -254,7 +280,6 @@ export async function getImportHistory(): Promise<ImportJob[]> {
 
 export async function triggerSync(): Promise<ImportJob> {
   await delay(500);
-  // Recarregar XML
   clearRecordsCache();
   const records = await getRecords();
   
