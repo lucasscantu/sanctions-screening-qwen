@@ -9,16 +9,17 @@ import {
   checkOllamaHealth,
   clearRecordsCache,
   addUploadedRecords,
+  clearUploadedRecords,
 } from '../api/client';
 import { SanctionedRecord } from '../types';
 
-// Dados de teste para simular upload
+// Neutral test data
 const mockRecords: SanctionedRecord[] = [
   {
     id: 1,
     referenceNumber: 'TEST-001',
     recordType: 'INDIVIDUAL',
-    primaryName: 'John Smith',
+    primaryName: 'Person Alpha',
     listingDate: '2020-01-01',
     lastUpdate: '2024-01-01',
     firstImported: '2024-01-01T00:00:00Z',
@@ -26,19 +27,19 @@ const mockRecords: SanctionedRecord[] = [
     sourceStatus: 'ACTIVE',
     sourceUrl: 'test',
     aliases: [
-      { id: 1, aliasName: 'Johnny Smith', quality: 'good', originalRepresentation: null },
+      { id: 1, aliasName: 'P. Alpha', quality: 'good', originalRepresentation: null },
     ],
     biographicalDetails: [{
       dateOfBirth: '1970-01-01',
       datePrecision: 'EXACT',
-      placeOfBirth: 'London',
-      nationality: 'British',
+      placeOfBirth: 'City A',
+      nationality: 'Nationality A',
       gender: 'M',
       identificationDocuments: [],
-      addresses: ['London, UK'],
+      addresses: ['City A'],
     }],
     sanctionsPrograms: [{
-      program: 'Test Program',
+      program: 'Program A',
       referenceInfo: 'Test',
       listingDetails: 'Test details',
     }],
@@ -47,7 +48,7 @@ const mockRecords: SanctionedRecord[] = [
     id: 2,
     referenceNumber: 'TEST-002',
     recordType: 'ENTITY',
-    primaryName: 'Global Trading Corp',
+    primaryName: 'Organization Beta',
     listingDate: '2021-01-01',
     lastUpdate: '2024-01-01',
     firstImported: '2024-01-01T00:00:00Z',
@@ -55,7 +56,7 @@ const mockRecords: SanctionedRecord[] = [
     sourceStatus: 'ACTIVE',
     sourceUrl: 'test',
     aliases: [
-      { id: 2, aliasName: 'GTC', quality: 'good', originalRepresentation: null },
+      { id: 2, aliasName: 'Org Beta', quality: 'good', originalRepresentation: null },
     ],
     biographicalDetails: [{
       dateOfBirth: null,
@@ -64,10 +65,10 @@ const mockRecords: SanctionedRecord[] = [
       nationality: null,
       gender: null,
       identificationDocuments: [],
-      addresses: ['Singapore'],
+      addresses: ['City B'],
     }],
     sanctionsPrograms: [{
-      program: 'Test Program',
+      program: 'Program B',
       referenceInfo: 'Test',
       listingDetails: 'Test details',
     }],
@@ -77,6 +78,7 @@ const mockRecords: SanctionedRecord[] = [
 describe('searchRecords', () => {
   beforeEach(() => {
     clearRecordsCache();
+    clearUploadedRecords();
     addUploadedRecords(mockRecords);
   });
 
@@ -87,18 +89,18 @@ describe('searchRecords', () => {
   });
 
   it('should return empty results for query shorter than 2 chars', async () => {
-    const result = await searchRecords('J');
+    const result = await searchRecords('P');
     expect(result.totalResults).toBe(0);
   });
 
   it('should find records matching the query', async () => {
-    const result = await searchRecords('John');
+    const result = await searchRecords('Person');
     expect(result.totalResults).toBeGreaterThan(0);
     expect(result.results.length).toBeGreaterThan(0);
   });
 
   it('should return results sorted by score descending', async () => {
-    const result = await searchRecords('John');
+    const result = await searchRecords('Person');
     if (result.results.length > 1) {
       for (let i = 0; i < result.results.length - 1; i++) {
         expect(result.results[i].finalScore).toBeGreaterThanOrEqual(
@@ -109,21 +111,21 @@ describe('searchRecords', () => {
   });
 
   it('should filter by record type INDIVIDUAL', async () => {
-    const result = await searchRecords('John', 'INDIVIDUAL');
+    const result = await searchRecords('Person', 'INDIVIDUAL');
     result.results.forEach(r => {
       expect(r.record.recordType).toBe('INDIVIDUAL');
     });
   });
 
   it('should filter by record type ENTITY', async () => {
-    const result = await searchRecords('Global', 'ENTITY');
+    const result = await searchRecords('Organization', 'ENTITY');
     result.results.forEach(r => {
       expect(r.record.recordType).toBe('ENTITY');
     });
   });
 
   it('should respect minimum score filter', async () => {
-    const result = await searchRecords('John', undefined, 20, 1, 50);
+    const result = await searchRecords('Person', undefined, 20, 1, 50);
     result.results.forEach(r => {
       expect(r.finalScore).toBeGreaterThanOrEqual(50);
     });
@@ -135,17 +137,10 @@ describe('searchRecords', () => {
     
     expect(page1.pageSize).toBe(2);
     expect(page1.page).toBe(1);
-    
-    if (page1.totalResults > 2) {
-      expect(page2.page).toBe(2);
-      if (page1.results.length > 0 && page2.results.length > 0) {
-        expect(page1.results[0].record.id).not.toBe(page2.results[0].record.id);
-      }
-    }
   });
 
   it('should include AI analysis for high-scoring results', async () => {
-    const result = await searchRecords('John Smith');
+    const result = await searchRecords('Person Alpha');
     const highScoreResult = result.results.find(r => r.finalScore >= 30);
     if (highScoreResult) {
       expect(highScoreResult.aiAnalysis).not.toBeNull();
@@ -155,7 +150,7 @@ describe('searchRecords', () => {
   });
 
   it('should include matching alias when applicable', async () => {
-    const result = await searchRecords('Johnny');
+    const result = await searchRecords('P. Alpha');
     const withAlias = result.results.find(r => r.matchingAlias !== null);
     if (withAlias) {
       expect(typeof withAlias.matchingAlias).toBe('string');
@@ -163,20 +158,20 @@ describe('searchRecords', () => {
   });
 
   it('should mark scores as experimental', async () => {
-    const result = await searchRecords('John');
+    const result = await searchRecords('Person');
     result.results.forEach(r => {
       expect(r.experimental).toBe(true);
     });
   });
 
   it('should report AI availability', async () => {
-    const result = await searchRecords('John');
+    const result = await searchRecords('Person');
     expect(typeof result.aiAvailable).toBe('boolean');
     expect(result.aiModel).toBe('qwen3:4b');
   });
 
   it('should measure search time', async () => {
-    const result = await searchRecords('John');
+    const result = await searchRecords('Person');
     expect(result.searchTimeMs).toBeGreaterThanOrEqual(0);
   });
 
@@ -189,6 +184,7 @@ describe('searchRecords', () => {
 describe('getRecordById', () => {
   beforeEach(() => {
     clearRecordsCache();
+    clearUploadedRecords();
     addUploadedRecords(mockRecords);
   });
 
@@ -217,7 +213,7 @@ describe('getRecordById', () => {
     expect(Array.isArray(record?.biographicalDetails)).toBe(true);
   });
 
-  it('should return record with sanctions programs', async () => {
+  it('should return record with programs', async () => {
     const record = await getRecordById(1);
     expect(record?.sanctionsPrograms).toBeDefined();
     expect(Array.isArray(record?.sanctionsPrograms)).toBe(true);
@@ -277,7 +273,7 @@ describe('getImportHistory', () => {
     clearUploadedRecords();
   });
 
-  it('should return array of import jobs', async () => {
+  it('should return array of import jobs when data is loaded', async () => {
     addUploadedRecords(mockRecords);
     const history = await getImportHistory();
     expect(Array.isArray(history)).toBe(true);
@@ -285,8 +281,6 @@ describe('getImportHistory', () => {
   });
 
   it('should return empty array when no data loaded', async () => {
-    clearRecordsCache();
-    clearUploadedRecords();
     const history = await getImportHistory();
     expect(history.length).toBe(0);
   });
