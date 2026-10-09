@@ -70,10 +70,10 @@ describe('Dashboard', () => {
     });
   });
 
-  it('should show loading state initially', () => {
+  it('should show loading state initially', async () => {
     renderWithProviders(<Dashboard />);
-    // Should show loading spinner or content
-    const container = screen.getByText('Dashboard').closest('div');
-    expect(container).toBeInTheDocument();
+    // Initially shows loading spinner
+    const spinner = document.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
   });
 });

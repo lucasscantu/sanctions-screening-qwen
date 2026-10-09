@@ -274,14 +274,19 @@ describe('getSyncStatus', () => {
 describe('getImportHistory', () => {
   beforeEach(() => {
     clearRecordsCache();
+    clearUploadedRecords();
   });
 
   it('should return array of import jobs', async () => {
+    addUploadedRecords(mockRecords);
     const history = await getImportHistory();
     expect(Array.isArray(history)).toBe(true);
+    expect(history.length).toBeGreaterThan(0);
   });
 
   it('should return empty array when no data loaded', async () => {
+    clearRecordsCache();
+    clearUploadedRecords();
     const history = await getImportHistory();
     expect(history.length).toBe(0);
   });
