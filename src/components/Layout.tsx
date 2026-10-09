@@ -12,6 +12,7 @@ export function Layout({ children }: LayoutProps) {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Search', href: '/search', icon: Search },
+    { name: 'Data', href: '/data', icon: Database },
     { name: 'Administration', href: '/admin', icon: Settings },
   ];
 

@@ -1,6 +1,26 @@
 import { SearchResponse, SearchResult, SanctionedRecord, DashboardStats, SyncStatus, ImportJob } from '../types';
 import { calculateSimilarity, getScoreLabel } from '../lib/similarity';
-import { mockRecords, mockDashboardStats, mockImportJobs } from './mock-data';
+import { loadSanctionsXML } from '../lib/xml-parser';
+
+// Cache dos registros carregados do XML
+let cachedRecords: SanctionedRecord[] | null = null;
+
+/**
+ * Carrega registros do XML (com cache)
+ */
+async function getRecords(): Promise<SanctionedRecord[]> {
+  if (!cachedRecords) {
+    cachedRecords = await loadSanctionsXML();
+  }
+  return cachedRecords;
+}
+
+/**
+ * Limpa o cache de registros
+ */
+export function clearRecordsCache(): void {
+  cachedRecords = null;
+}
 
 function generateAIAnalysis(searchName: string, record: SanctionedRecord, score: number) {
   const normalizedSearch = searchName.toLowerCase().trim();
@@ -78,7 +98,7 @@ export async function searchRecords(
   page: number = 1,
   minScore: number = 0
 ): Promise<SearchResponse> {
-  await delay(300 + Math.random() * 500);
+  await delay(100 + Math.random() * 200); // Simular processamento
 
   if (!name || name.trim().length < 2) {
     return {
@@ -94,9 +114,10 @@ export async function searchRecords(
   }
 
   const startTime = Date.now();
+  const records = await getRecords();
   const results: SearchResult[] = [];
 
-  for (const record of mockRecords) {
+  for (const record of records) {
     if (type && record.recordType !== type) continue;
 
     const aliases = record.aliases.map(a => a.aliasName);
@@ -146,47 +167,89 @@ export async function searchRecords(
 }
 
 export async function getRecordById(id: number): Promise<SanctionedRecord | null> {
-  await delay(200);
-  return mockRecords.find(r => r.id === id) || null;
+  await delay(50);
+  const records = await getRecords();
+  return records.find(r => r.id === id) || null;
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  await delay(300);
-  return { ...mockDashboardStats };
+  await delay(100);
+  const records = await getRecords();
+  
+  const individuals = records.filter(r => r.recordType === 'INDIVIDUAL').length;
+  const entities = records.filter(r => r.recordType === 'ENTITY').length;
+
+  return {
+    totalIndividuals: individuals,
+    totalEntities: entities,
+    totalRecords: records.length,
+    lastSyncTime: new Date().toISOString(),
+    lastSyncStatus: 'SUCCESS',
+    recentFailures: [],
+    ollamaAvailable: true,
+    ollamaModel: 'qwen3:4b',
+    dataFreshness: new Date().toISOString().split('T')[0],
+  };
 }
 
 export async function getSyncStatus(): Promise<SyncStatus> {
-  await delay(200);
+  await delay(50);
   return {
-    lastSync: mockImportJobs[0],
+    lastSync: {
+      id: 1,
+      startTime: new Date().toISOString(),
+      completionTime: new Date().toISOString(),
+      status: 'COMPLETED',
+      recordsCreated: 0,
+      recordsUpdated: 0,
+      recordsRemoved: 0,
+      failures: 0,
+      errorSummary: null,
+      sourceUrl: 'Local XML File',
+    },
     isRunning: false,
-    scheduledInterval: '1 day',
-    nextScheduledRun: '2024-12-02T10:00:00Z',
+    scheduledInterval: 'Manual',
+    nextScheduledRun: null,
   };
 }
 
 export async function getImportHistory(): Promise<ImportJob[]> {
-  await delay(200);
-  return [...mockImportJobs];
-}
-
-export async function triggerSync(): Promise<ImportJob> {
-  await delay(2000);
-  return {
-    id: mockImportJobs.length + 1,
+  await delay(50);
+  return [{
+    id: 1,
     startTime: new Date().toISOString(),
     completionTime: new Date().toISOString(),
     status: 'COMPLETED',
     recordsCreated: 0,
-    recordsUpdated: 12,
+    recordsUpdated: 0,
     recordsRemoved: 0,
     failures: 0,
     errorSummary: null,
-    sourceUrl: 'https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list',
+    sourceUrl: 'Local XML File',
+  }];
+}
+
+export async function triggerSync(): Promise<ImportJob> {
+  await delay(500);
+  // Recarregar XML
+  clearRecordsCache();
+  await getRecords();
+  
+  return {
+    id: Date.now(),
+    startTime: new Date().toISOString(),
+    completionTime: new Date().toISOString(),
+    status: 'COMPLETED',
+    recordsCreated: 0,
+    recordsUpdated: 0,
+    recordsRemoved: 0,
+    failures: 0,
+    errorSummary: null,
+    sourceUrl: 'Local XML File',
   };
 }
 
 export async function checkOllamaHealth(): Promise<{ available: boolean; model: string }> {
-  await delay(100);
+  await delay(50);
   return { available: true, model: 'qwen3:4b' };
 }

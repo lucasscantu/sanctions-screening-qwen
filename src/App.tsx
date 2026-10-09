@@ -5,6 +5,7 @@ import { Dashboard } from './pages/Dashboard';
 import { SearchPage } from './pages/SearchPage';
 import { RecordDetails } from './pages/RecordDetails';
 import { AdminPage } from './pages/AdminPage';
+import { DataManager } from './pages/DataManager';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,6 +26,7 @@ function App() {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/records/:id" element={<RecordDetails />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/data" element={<DataManager />} />
           </Routes>
         </Layout>
       </HashRouter>
