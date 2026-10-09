@@ -1,68 +1,82 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getDashboardStats, triggerSync, clearRecordsCache } from '../api/client';
 import { validateXML, detectXMLFormat } from '../lib/xml-parser';
-import { FileText, Upload, RefreshCw, CheckCircle, AlertCircle, Database, Users, Building2 } from 'lucide-react';
+import { FileText, Upload, RefreshCw, CheckCircle, AlertCircle, Database, Users, Building2, FolderOpen, AlertTriangle } from 'lucide-react';
 
 export function DataManager() {
   const queryClient = useQueryClient();
   const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [xmlContent, setXmlContent] = useState<string>('');
+  const [manifestFiles, setManifestFiles] = useState<string[]>([]);
+  const [manifestError, setManifestError] = useState<string | null>(null);
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: getDashboardStats,
   });
 
+  // Carregar manifesto ao iniciar
+  useEffect(() => {
+    fetch('/archives/manifest.json')
+      .then(res => res.json())
+      .then(data => {
+        setManifestFiles(data.files || []);
+        setManifestError(null);
+      })
+      .catch(err => {
+        setManifestError('Não foi possível carregar o manifesto');
+      });
+  }, []);
+
   const syncMutation = useMutation({
     mutationFn: triggerSync,
     onSuccess: () => {
-      setUploadMessage({ type: 'success', text: 'XML recarregado com sucesso!' });
+      setUploadMessage({ type: 'success', text: 'Arquivos XML recarregados com sucesso!' });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       queryClient.invalidateQueries({ queryKey: ['search'] });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       setUploadMessage({ type: 'error', text: `Erro ao recarregar: ${error.message}` });
     },
   });
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.name.endsWith('.xml')) {
-      setUploadMessage({ type: 'error', text: 'Por favor, selecione um arquivo XML' });
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const content = e.target?.result as string;
-      
-      if (!validateXML(content)) {
-        setUploadMessage({ type: 'error', text: 'XML inválido. Verifique o formato do arquivo.' });
-        return;
-      }
-
-      setXmlContent(content);
-      setUploadMessage({ type: 'success', text: 'Arquivo XML carregado. Clique em "Recarregar Dados" para aplicar.' });
-    };
-    reader.readAsText(file);
-  };
 
   const handleReload = () => {
     clearRecordsCache();
     syncMutation.mutate();
   };
 
+  const hasData = stats && stats.totalRecords > 0;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Gerenciamento de Dados</h1>
         <p className="mt-2 text-slate-600">
-          Gerencie o arquivo XML de sanções local
+          Gerencie os arquivos XML de sanções na pasta <code className="bg-slate-100 px-2 py-0.5 rounded">archives/</code>
         </p>
       </div>
+
+      {/* Aviso se não há dados */}
+      {!statsLoading && !hasData && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+          <div className="flex items-start">
+            <AlertTriangle className="h-6 w-6 text-amber-600 mr-3 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-lg font-semibold text-amber-900 mb-2">
+                Nenhum arquivo XML carregado
+              </h3>
+              <p className="text-sm text-amber-800 mb-3">
+                Para começar a usar o sistema, você precisa adicionar arquivos XML na pasta <code className="bg-amber-100 px-1 rounded">public/archives/</code> e listá-los no arquivo <code className="bg-amber-100 px-1 rounded">manifest.json</code>.
+              </p>
+              <div className="bg-white rounded p-3 text-xs font-mono">
+                <p className="text-slate-600 mb-1"># Passo 1: Coloque seus arquivos XML em public/archives/</p>
+                <p className="text-slate-600 mb-1"># Passo 2: Edite public/archives/manifest.json</p>
+                <p className="text-slate-600 mb-1"># Passo 3: Clique em "Recarregar Dados" abaixo</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Estatísticas Atuais */}
       <div className="bg-white rounded-lg shadow p-6">
@@ -110,66 +124,42 @@ export function DataManager() {
         ) : null}
       </div>
 
-      {/* Upload de Arquivo */}
+      {/* Arquivos no Manifesto */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
-          <Upload className="h-5 w-5 mr-2 text-primary-600" />
-          Carregar Arquivo XML
+          <FolderOpen className="h-5 w-5 mr-2 text-primary-600" />
+          Arquivos XML Configurados
         </h2>
         
-        <div className="space-y-4">
-          <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-primary-500 transition-colors">
-            <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-            <p className="text-sm text-slate-600 mb-2">
-              Arraste um arquivo XML aqui ou clique para selecionar
-            </p>
-            <input
-              type="file"
-              accept=".xml"
-              onChange={handleFileUpload}
-              className="hidden"
-              id="xml-upload"
-            />
-            <label
-              htmlFor="xml-upload"
-              className="inline-block px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 cursor-pointer transition-colors"
-            >
-              Selecionar Arquivo XML
-            </label>
+        {manifestError ? (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800">{manifestError}</p>
           </div>
-
-          {xmlContent && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-800 font-medium mb-2">
-                ✅ Arquivo carregado com sucesso!
-              </p>
-              <p className="text-xs text-green-700">
-                Tamanho: {(xmlContent.length / 1024).toFixed(2)} KB
-              </p>
-            </div>
-          )}
-
-          {uploadMessage && (
-            <div className={`p-4 rounded-lg ${
-              uploadMessage.type === 'success' 
-                ? 'bg-green-50 border border-green-200' 
-                : 'bg-red-50 border border-red-200'
-            }`}>
-              <div className="flex items-start">
-                {uploadMessage.type === 'success' ? (
-                  <CheckCircle className="h-5 w-5 text-green-600 mr-2 flex-shrink-0" />
-                ) : (
-                  <AlertCircle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0" />
-                )}
-                <p className={`text-sm ${
-                  uploadMessage.type === 'success' ? 'text-green-800' : 'text-red-800'
-                }`}>
-                  {uploadMessage.text}
-                </p>
+        ) : manifestFiles.length === 0 ? (
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
+            <p className="text-sm text-slate-600">
+              Nenhum arquivo configurado no manifesto.
+            </p>
+            <p className="text-xs text-slate-500 mt-2">
+              Edite <code className="bg-slate-200 px-1 rounded">public/archives/manifest.json</code> para adicionar arquivos.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {manifestFiles.map((file, index) => (
+              <div key={index} className="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <FileText className="h-5 w-5 text-primary-600 mr-3 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="font-medium text-slate-900">{file}</p>
+                  <p className="text-xs text-slate-500">public/archives/{file}</p>
+                </div>
+                <CheckCircle className="h-5 w-5 text-green-500" />
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+        )}
 
+        <div className="mt-4">
           <button
             onClick={handleReload}
             disabled={syncMutation.isPending}
@@ -188,104 +178,105 @@ export function DataManager() {
             )}
           </button>
         </div>
+
+        {uploadMessage && (
+          <div className={`mt-4 p-4 rounded-lg ${
+            uploadMessage.type === 'success' 
+              ? 'bg-green-50 border border-green-200' 
+              : 'bg-red-50 border border-red-200'
+          }`}>
+            <div className="flex items-start">
+              {uploadMessage.type === 'success' ? (
+                <CheckCircle className="h-5 w-5 text-green-600 mr-2 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0" />
+              )}
+              <p className={`text-sm ${
+                uploadMessage.type === 'success' ? 'text-green-800' : 'text-red-800'
+              }`}>
+                {uploadMessage.text}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Informações */}
+      {/* Instruções */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-blue-900 mb-3">
-          📁 Sobre os Arquivos XML
+          📖 Como Usar
         </h3>
-        <div className="text-sm text-blue-800 space-y-2">
-          <p>
-            O sistema carrega <strong>TODOS os arquivos XML</strong> da pasta:
-          </p>
-          <code className="block bg-blue-100 px-3 py-2 rounded text-xs font-mono">
-            /public/archives/
-          </code>
-          <p className="mt-3">
-            <strong>Formatos suportados:</strong>
-          </p>
-          <ul className="list-disc list-inside space-y-1 text-xs">
-            <li><strong>Formato Oficial ONU:</strong> Tags em MAIÚSCULAS (INDIVIDUAL, ENTITY, FIRST_NAME, etc.)</li>
-            <li><strong>Formato Simplificado:</strong> Tags em minúsculas (individual, entity, primaryName, etc.)</li>
-          </ul>
-          <p className="mt-3">
-            <strong>Como adicionar mais arquivos:</strong>
-          </p>
-          <ol className="list-decimal list-inside space-y-1 text-xs ml-2">
-            <li>Coloque o arquivo XML na pasta <code>/public/archives/</code></li>
-            <li>Adicione o nome do arquivo em <code>/public/archives/manifest.json</code></li>
-            <li>Clique em "Recarregar Dados" nesta página</li>
-          </ol>
-          <p className="mt-3">
-            <strong>Nota:</strong> Todos os dados são processados localmente. Nenhum dado é enviado para servidores externos.
-          </p>
+        <div className="text-sm text-blue-800 space-y-3">
+          <div>
+            <p className="font-medium mb-1">1. Adicione seus arquivos XML</p>
+            <p className="text-xs ml-4">
+              Coloque seus arquivos XML na pasta <code className="bg-blue-100 px-1 rounded">public/archives/</code>
+            </p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">2. Configure o manifesto</p>
+            <p className="text-xs ml-4">
+              Edite <code className="bg-blue-100 px-1 rounded">public/archives/manifest.json</code> e liste os nomes dos arquivos:
+            </p>
+            <pre className="bg-blue-100 p-2 rounded text-xs mt-1 overflow-x-auto">
+{`{
+  "files": [
+    "meu-arquivo-1.xml",
+    "meu-arquivo-2.xml"
+  ]
+}`}
+            </pre>
+          </div>
+          <div>
+            <p className="font-medium mb-1">3. Recarregue os dados</p>
+            <p className="text-xs ml-4">
+              Clique no botão "Recarregar Dados" acima
+            </p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">4. Faça suas buscas</p>
+            <p className="text-xs ml-4">
+              Acesse a página "Search" para buscar nos dados carregados
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Exemplo de XML - Formato Oficial ONU */}
+      {/* Formatos Suportados */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-slate-900 mb-4">
-          📋 Exemplo: Formato Oficial ONU
+          📋 Formatos XML Suportados
         </h2>
-        <pre className="bg-slate-50 p-4 rounded-lg overflow-x-auto text-xs">
-{`<?xml version="1.0" encoding="UTF-8"?>
-<DATAEXPORT>
-  <INDIVIDUALS>
-    <INDIVIDUAL>
-      <DATAID>6908399</DATAID>
-      <FIRST_NAME>ABD AL-RAHMAN</FIRST_NAME>
-      <SECOND_NAME>KHALAF</SECOND_NAME>
-      <THIRD_NAME>UBAYD JUDAY</THIRD_NAME>
-      <FOURTH_NAME>AL-ANIZI</FOURTH_NAME>
-      <UN_LIST_TYPE>Al-Qaida</UN_LIST_TYPE>
-      <REFERENCE_NUMBER>QDi.335</REFERENCE_NUMBER>
-      <LISTED_ON>2014-09-23</LISTED_ON>
-      <NATIONALITY>
-        <VALUE>Kuwait</VALUE>
-      </NATIONALITY>
-      <INDIVIDUAL_ALIAS>
-        <QUALITY>Good</QUALITY>
-        <ALIAS_NAME>Abd al-Rahman Khalaf al-Anizi</ALIAS_NAME>
-      </INDIVIDUAL_ALIAS>
-      <INDIVIDUAL_DATE_OF_BIRTH>
-        <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
-        <DATE>1973-03-06</DATE>
-      </INDIVIDUAL_DATE_OF_BIRTH>
-      <INDIVIDUAL_DOCUMENT>
-        <TYPE_OF_DOCUMENT>National ID</TYPE_OF_DOCUMENT>
-        <NUMBER>273030601222</NUMBER>
-        <ISSUING_COUNTRY>Kuwait</ISSUING_COUNTRY>
-      </INDIVIDUAL_DOCUMENT>
-    </INDIVIDUAL>
-  </INDIVIDUALS>
-</DATAEXPORT>`}
-        </pre>
-      </div>
-
-      {/* Exemplo de XML - Formato Simplificado */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">
-          📋 Exemplo: Formato Simplificado
-        </h2>
-        <pre className="bg-slate-50 p-4 rounded-lg overflow-x-auto text-xs">
-{`<?xml version="1.0" encoding="UTF-8"?>
-<sanctionsList>
-  <individual id="REG-001" dateListed="2020-01-01">
-    <primaryName>John Smith</primaryName>
-    <alias quality="good">Johnny Smith</alias>
-    <dateOfBirth precision="EXACT">1960-01-01</dateOfBirth>
-    <nationality>British</nationality>
-    <program name="Program A">Details</program>
-  </individual>
-  
-  <entity id="REG-002" dateListed="2021-01-01">
-    <primaryName>Company Ltd</primaryName>
-    <alias>CL</alias>
-    <program name="Program B">Details</program>
-  </entity>
-</sanctionsList>`}
-        </pre>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 className="font-medium text-slate-900 mb-2">Formato Oficial ONU</h3>
+            <p className="text-xs text-slate-600 mb-2">Tags em MAIÚSCULAS</p>
+            <pre className="text-xs bg-white p-2 rounded overflow-x-auto">
+{`<INDIVIDUAL>
+  <FIRST_NAME>JOHN</FIRST_NAME>
+  <SECOND_NAME>SMITH</SECOND_NAME>
+  <REFERENCE_NUMBER>QDi.001</REFERENCE_NUMBER>
+  <INDIVIDUAL_ALIAS>
+    <ALIAS_NAME>Johnny</ALIAS_NAME>
+  </INDIVIDUAL_ALIAS>
+</INDIVIDUAL>`}
+            </pre>
+          </div>
+          <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <h3 className="font-medium text-slate-900 mb-2">Formato Simplificado</h3>
+            <p className="text-xs text-slate-600 mb-2">Tags em minúsculas</p>
+            <pre className="text-xs bg-white p-2 rounded overflow-x-auto">
+{`<individual id="REG-001">
+  <primaryName>John Smith</primaryName>
+  <alias>Johnny</alias>
+  <nationality>British</nationality>
+</individual>`}
+            </pre>
+          </div>
+        </div>
+        <p className="text-xs text-slate-500 mt-4">
+          O sistema detecta automaticamente o formato de cada arquivo. Você pode misturar formatos na mesma pasta.
+        </p>
       </div>
     </div>
   );
