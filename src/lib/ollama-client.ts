@@ -1,6 +1,5 @@
 /**
- * Ollama API Client
- * Handles communication with local Ollama instance
+ * Ollama API Client - Real AI Integration
  */
 
 export interface OllamaConfig {
@@ -10,10 +9,10 @@ export interface OllamaConfig {
   enabled: boolean;
 }
 
-export interface OllamaResponse {
-  model: string;
-  response: string;
-  done: boolean;
+export interface OllamaModel {
+  name: string;
+  size: number;
+  modified_at: string;
 }
 
 export interface NameAnalysis {
@@ -25,47 +24,30 @@ export interface NameAnalysis {
   missingInformation: string[];
 }
 
-const DEFAULT_CONFIG: OllamaConfig = {
-  baseUrl: 'http://localhost:11434',
-  model: 'qwen3:4b',
-  timeout: 30000,
-  enabled: true,
-};
-
 class OllamaClient {
-  private config: OllamaConfig;
-  private available: boolean | null = null;
+  private config: OllamaConfig = {
+    baseUrl: 'http://localhost:11434',
+    model: 'qwen3:4b',
+    timeout: 30000,
+    enabled: true,
+  };
+  
+  private available: boolean = false;
+  private models: OllamaModel[] = [];
 
-  constructor(config: Partial<OllamaConfig> = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
-  }
-
-  /**
-   * Check if Ollama is available
-   */
   async checkAvailability(): Promise<boolean> {
-    if (!this.config.enabled) {
-      this.available = false;
-      return false;
-    }
-
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
       const response = await fetch(`${this.config.baseUrl}/api/tags`, {
-        signal: controller.signal,
+        signal: AbortSignal.timeout(5000),
       });
-
-      clearTimeout(timeoutId);
-
+      
       if (response.ok) {
         const data = await response.json();
-        const hasModel = data.models?.some((m: any) => m.name.includes(this.config.model));
-        this.available = hasModel || true;
-        return this.available === true;
+        this.models = data.models || [];
+        this.available = this.models.length > 0;
+        return this.available;
       }
-
+      
       this.available = false;
       return false;
     } catch (error) {
@@ -75,52 +57,51 @@ class OllamaClient {
     }
   }
 
-  /**
-   * Get cached availability status
-   */
-  isAvailable(): boolean {
-    return this.available === true;
+  async getAvailableModels(): Promise<OllamaModel[]> {
+    await this.checkAvailability();
+    return this.models;
   }
 
-  /**
-   * Generate analysis for name comparison
-   */
+  isAvailable(): boolean {
+    return this.available;
+  }
+
+  setModel(model: string): void {
+    this.config.model = model;
+  }
+
+  getModel(): string {
+    return this.config.model;
+  }
+
   async analyzeNameMatch(
     searchedName: string,
     recordName: string,
     aliases: string[],
     score: number
   ): Promise<NameAnalysis | null> {
-    if (!this.isAvailable()) {
-      return null;
-    }
+    if (!this.isAvailable()) return null;
 
     const prompt = this.buildPrompt(searchedName, recordName, aliases, score);
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
-
       const response = await fetch(`${this.config.baseUrl}/api/generate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: this.config.model,
-          prompt: prompt,
+          prompt,
           stream: false,
         }),
-        signal: controller.signal,
+        signal: AbortSignal.timeout(this.config.timeout),
       });
 
-      clearTimeout(timeoutId);
-
       if (!response.ok) {
-        throw new Error(`Ollama API error: ${response.status}`);
+        console.error('Ollama API error:', response.status);
+        return null;
       }
 
-      const data: OllamaResponse = await response.json();
+      const data = await response.json();
       return this.parseResponse(data.response);
     } catch (error) {
       console.error('Ollama analysis failed:', error);
@@ -128,9 +109,6 @@ class OllamaClient {
     }
   }
 
-  /**
-   * Build prompt for name analysis
-   */
   private buildPrompt(
     searchedName: string,
     recordName: string,
@@ -138,45 +116,33 @@ class OllamaClient {
     score: number
   ): string {
     const aliasesText = aliases.length > 0 
-      ? `\nAliases: ${aliases.join(', ')}`
+      ? `\nAlternative forms: ${aliases.join(', ')}`
       : '';
 
-    return `You are a linguistic expert analyzing name similarity for compliance purposes.
+    return `You are a linguistic analysis system. Compare these two text strings:
 
-Analyze if these two names could be linguistic variants or transliterations of the same person:
-
-Searched Name: ${searchedName}
-Record Name: ${recordName}${aliasesText}
+String A: ${searchedName}
+String B: ${recordName}${aliasesText}
 Similarity Score: ${score}%
 
-Provide your analysis in this exact JSON format:
+Analyze if these could be linguistic variants or transliterations.
+
+Respond with valid JSON only:
 {
   "isLinguisticVariant": true/false,
-  "explanation": "Brief explanation of your reasoning",
+  "explanation": "brief explanation",
   "confidence": "high/medium/low",
-  "supportingEvidence": ["list of supporting factors"],
-  "conflictingEvidence": ["list of conflicting factors"],
-  "missingInformation": ["list of missing info that would help"]
-}
-
-Consider:
-- Common transliteration patterns (Arabic, Chinese, Cyrillic, etc.)
-- Cultural naming conventions
-- Phonetic similarities
-- Character substitutions
-
-Respond ONLY with valid JSON, no additional text.`;
+  "supportingEvidence": ["factor1", "factor2"],
+  "conflictingEvidence": ["factor1"],
+  "missingInformation": ["info1"]
+}`;
   }
 
-  /**
-   * Parse Ollama response into structured analysis
-   */
   private parseResponse(responseText: string): NameAnalysis {
     try {
-      // Try to extract JSON from response
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
-        throw new Error('No JSON found in response');
+        throw new Error('No JSON in response');
       }
 
       const parsed = JSON.parse(jsonMatch[0]);
@@ -190,33 +156,26 @@ Respond ONLY with valid JSON, no additional text.`;
         missingInformation: parsed.missingInformation || [],
       };
     } catch (error) {
-      console.error('Failed to parse Ollama response:', error);
+      console.error('Parse error:', error);
       return {
         isLinguisticVariant: false,
-        explanation: 'AI analysis failed to parse response',
+        explanation: 'AI analysis failed',
         confidence: 'low',
         supportingEvidence: [],
         conflictingEvidence: [],
-        missingInformation: ['AI response could not be parsed'],
+        missingInformation: ['Response parsing failed'],
       };
     }
   }
 
-  /**
-   * Update configuration
-   */
   updateConfig(config: Partial<OllamaConfig>): void {
     this.config = { ...this.config, ...config };
-    this.available = null; // Reset availability cache
+    this.available = false;
   }
 
-  /**
-   * Get current configuration
-   */
   getConfig(): OllamaConfig {
     return { ...this.config };
   }
 }
 
-// Singleton instance
 export const ollamaClient = new OllamaClient();
