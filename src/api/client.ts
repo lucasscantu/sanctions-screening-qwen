@@ -54,7 +54,14 @@ export function clearUploadedRecords(): void {
  */
 export async function fetchXMLFromURL(url: string): Promise<{ records: SanctionedRecord[]; filename: string }> {
   try {
-    const response = await fetch(url);
+    // Tentar fetch direto primeiro
+    let response = await fetch(url);
+    
+    // Se falhar por CORS, tentar com proxy
+    if (!response.ok || response.status === 403) {
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      response = await fetch(proxyUrl);
+    }
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
