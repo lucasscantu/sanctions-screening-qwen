@@ -50,18 +50,52 @@ export function clearUploadedRecords(): void {
 }
 
 /**
+ * Lista de proxies CORS para fallback
+ */
+const CORS_PROXIES = [
+  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
+
+/**
+ * Tenta buscar XML usando múltiplos proxies CORS
+ */
+async function fetchWithProxy(url: string): Promise<Response> {
+  // Tentar fetch direto primeiro
+  try {
+    const directResponse = await fetch(url, { mode: 'cors' });
+    if (directResponse.ok) {
+      return directResponse;
+    }
+  } catch (error) {
+    console.log('Direct fetch failed, trying proxies...');
+  }
+
+  // Tentar cada proxy em sequência
+  for (const proxyFn of CORS_PROXIES) {
+    try {
+      const proxyUrl = proxyFn(url);
+      const response = await fetch(proxyUrl);
+      if (response.ok) {
+        console.log(`Successfully fetched via proxy: ${proxyUrl}`);
+        return response;
+      }
+    } catch (error) {
+      console.log(`Proxy failed: ${proxyFn.toString()}`);
+      continue;
+    }
+  }
+
+  throw new Error('All fetch attempts failed. Please check the URL or download the file manually.');
+}
+
+/**
  * Busca e processa XML de uma URL
  */
 export async function fetchXMLFromURL(url: string): Promise<{ records: SanctionedRecord[]; filename: string }> {
   try {
-    // Tentar fetch direto primeiro
-    let response = await fetch(url);
-    
-    // Se falhar por CORS, tentar com proxy
-    if (!response.ok || response.status === 403) {
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      response = await fetch(proxyUrl);
-    }
+    const response = await fetchWithProxy(url);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
