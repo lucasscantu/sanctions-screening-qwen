@@ -1,6 +1,7 @@
 import { SearchResponse, SearchResult, SanctionedRecord, DashboardStats, SyncStatus, ImportJob } from '../types';
 import { calculateSimilarity, getScoreLabel } from '../lib/similarity';
 import { loadAllSanctionsXML, SanctionsXMLParser } from '../lib/xml-parser';
+import { ollamaClient } from '../lib/ollama-client';
 
 // Cache dos registros carregados do XML
 let cachedRecords: SanctionedRecord[] | null = null;
