@@ -188,18 +188,65 @@ export function DataManager() {
                 Nenhum arquivo XML carregado
               </h3>
               <p className="text-sm text-amber-800">
-                Use o campo abaixo para selecionar e carregar arquivos XML do seu computador.
+                Use os campos abaixo para carregar arquivos XML do seu computador ou via URL.
               </p>
             </div>
           </div>
         </div>
       )}
 
+      {/* Importar via URL */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+          <LinkIcon className="h-5 w-5 mr-2 text-primary-600" />
+          Importar XML via URL
+        </h2>
+        
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="xml-url" className="block text-sm font-medium text-slate-700 mb-2">
+              URL do arquivo XML
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="xml-url"
+                type="url"
+                value={xmlUrl}
+                onChange={(e) => setXmlUrl(e.target.value)}
+                placeholder="https://exemplo.com/arquivo.xml"
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                disabled={isUrlLoading}
+              />
+              <button
+                onClick={handleUrlImport}
+                disabled={isUrlLoading || !xmlUrl.trim()}
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors flex items-center"
+              >
+                {isUrlLoading ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Importando...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Importar
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Cole a URL de um arquivo XML remoto. O arquivo será baixado e processado localmente.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Upload de Arquivo */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
           <Upload className="h-5 w-5 mr-2 text-primary-600" />
-          Carregar Arquivo XML
+          Carregar Arquivo XML do Computador
         </h2>
         
         <div className="space-y-4">
@@ -244,6 +291,53 @@ export function DataManager() {
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Importar via URL */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+          <LinkIcon className="h-5 w-5 mr-2 text-primary-600" />
+          Importar XML via URL
+        </h2>
+        
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="xml-url" className="block text-sm font-medium text-slate-700 mb-2">
+              URL do arquivo XML
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="xml-url"
+                type="url"
+                value={xmlUrl}
+                onChange={(e) => setXmlUrl(e.target.value)}
+                placeholder="https://exemplo.com/arquivo.xml"
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                disabled={isUrlLoading}
+              />
+              <button
+                onClick={handleUrlImport}
+                disabled={isUrlLoading || !xmlUrl.trim()}
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors flex items-center"
+              >
+                {isUrlLoading ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Importando...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Importar
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Cole a URL de um arquivo XML remoto. O arquivo será baixado e processado localmente.
+            </p>
+          </div>
         </div>
       </div>
 
