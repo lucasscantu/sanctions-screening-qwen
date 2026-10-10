@@ -1,8 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { getDashboardStats, getSyncStatus } from '../api/client';
 import { Shield, Users, Building2, Clock, AlertTriangle, Cpu, Database, CheckCircle, XCircle } from 'lucide-react';
+import { ollamaClient } from '../lib/ollama-client';
+import { useEffect, useState } from 'react';
 
 export function Dashboard() {
+  const [ollamaAvailable, setOllamaAvailable] = useState(false);
+  const [ollamaModel, setOllamaModel] = useState('');
+
+  useEffect(() => {
+    ollamaClient.checkAvailability().then(available => {
+      setOllamaAvailable(available);
+      if (available) {
+        setOllamaModel(ollamaClient.getModel());
+      }
+    });
+  }, []);
+
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: getDashboardStats,
@@ -69,8 +83,8 @@ export function Dashboard() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-slate-600">Ollama Status</span>
-              <span className={`flex items-center ${stats.ollamaAvailable ? 'text-green-600' : 'text-red-600'}`}>
-                {stats.ollamaAvailable ? (
+              <span className={`flex items-center ${ollamaAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                {ollamaAvailable ? (
                   <>
                     <CheckCircle className="h-4 w-4 mr-1" />
                     Available
@@ -86,7 +100,7 @@ export function Dashboard() {
             <div className="flex items-center justify-between">
               <span className="text-slate-600">Model</span>
               <span className="font-mono text-sm text-slate-900">
-                {stats.ollamaModel || 'Not configured'}
+                {ollamaModel || 'Not configured'}
               </span>
             </div>
             <div className="mt-4 p-3 bg-blue-50 rounded-md">
