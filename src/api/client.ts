@@ -115,68 +115,44 @@ export async function fetchXMLFromURL(url: string): Promise<{ records: Sanctione
   }
 }
 
-function generateAIAnalysis(searchName: string, record: SanctionedRecord, score: number) {
-  const normalizedSearch = searchName.toLowerCase().trim();
-  const normalizedRecord = record.primaryName.toLowerCase().trim();
+let ollamaChecked = false;
+
+async function ensureOllamaChecked() {
+  if (!ollamaChecked) {
+    await ollamaClient.checkAvailability();
+    ollamaChecked = true;
+  }
+}
+
+async function generateAIAnalysis(
+  searchName: string,
+  record: SanctionedRecord,
+  score: number
+) {
+  await ensureOllamaChecked();
   
-  const supportingFields: string[] = [];
-  const conflictingFields: string[] = [];
-  const missingInformation: string[] = [];
-
-  const searchTokens = normalizedSearch.split(/\s+/);
-  const recordTokens = normalizedRecord.split(/\s+/);
-  const sharedTokens = searchTokens.filter(t => recordTokens.includes(t));
-  
-  if (sharedTokens.length > 0) {
-    supportingFields.push(`Shared name components: ${sharedTokens.join(', ')}`);
+  if (!ollamaClient.isAvailable()) {
+    return null;
   }
 
-  const matchingAliases = record.aliases.filter(a => {
-    const aliasTokens = a.aliasName.toLowerCase().split(/\s+/);
-    return searchTokens.some(t => aliasTokens.includes(t));
-  });
+  const aliases = record.aliases.map(a => a.aliasName);
+  const analysis = await ollamaClient.analyzeNameMatch(
+    searchName,
+    record.primaryName,
+    aliases,
+    score
+  );
 
-  if (matchingAliases.length > 0) {
-    supportingFields.push(`Matching alias: ${matchingAliases[0].aliasName}`);
-  }
-
-  if (record.biographicalDetails.length > 0) {
-    const bio = record.biographicalDetails[0];
-    if (bio.nationality) supportingFields.push(`Nationality: ${bio.nationality}`);
-    if (bio.placeOfBirth) supportingFields.push(`Place of birth: ${bio.placeOfBirth}`);
-    if (bio.dateOfBirth) supportingFields.push(`Date of birth: ${bio.dateOfBirth}`);
-  }
-
-  if (!record.biographicalDetails[0]?.dateOfBirth) {
-    missingInformation.push('Date of birth not available for comparison');
-  }
-  if (!record.biographicalDetails[0]?.nationality) {
-    missingInformation.push('Nationality not available for comparison');
-  }
-
-  const isLinguisticVariant = score >= 60 && sharedTokens.length >= 1;
-  
-  let explanation = '';
-  if (score >= 85) {
-    explanation = `The searched name and the listed name show very high textual similarity. The shared components suggest these may be spelling variants or transliterations of the same name.`;
-  } else if (score >= 65) {
-    explanation = `The names show moderate similarity. Differences may be due to transliteration conventions, spelling variations, or the use of different name components.`;
-  } else if (score >= 45) {
-    explanation = `The names show some similarity but with notable differences. This could indicate a partial match, a different transliteration, or an unrelated name with coincidental similarity.`;
-  } else {
-    explanation = `The names show low similarity. Any resemblance is likely coincidental.`;
-  }
-
-  const qualitativeAssessment = getScoreLabel(score);
+  if (!analysis) return null;
 
   return {
-    linguisticVariants: isLinguisticVariant,
-    explanation,
-    supportingFields,
-    conflictingFields,
-    missingInformation,
-    qualitativeAssessment,
-    disclaimer: 'Name similarity alone cannot establish identity. This analysis is based on textual comparison and does not constitute a determination of personal identity.',
+    linguisticVariants: analysis.isLinguisticVariant,
+    explanation: analysis.explanation,
+    supportingFields: analysis.supportingEvidence,
+    conflictingFields: analysis.conflictingEvidence,
+    missingInformation: analysis.missingInformation,
+    qualitativeAssessment: analysis.confidence.toUpperCase() as 'HIGH' | 'MEDIUM' | 'LOW' | 'INDETERMINATE',
+    disclaimer: 'AI analysis provided by local Ollama instance.',
   };
 }
 
@@ -236,7 +212,7 @@ export async function searchRecords(
         return aliasScore >= score - 5;
       })?.aliasName || null;
 
-      const aiAnalysis = score >= 30 ? generateAIAnalysis(name, record, score) : null;
+      const aiAnalysis = score >= 30 ? await generateAIAnalysis(name, record, score) : null;
 
       const finalScore = aiAnalysis 
         ? Math.min(100, Math.round(score * 0.7 + (aiAnalysis.qualitativeAssessment === 'HIGH' ? 100 : aiAnalysis.qualitativeAssessment === 'MEDIUM' ? 70 : aiAnalysis.qualitativeAssessment === 'LOW' ? 40 : 20) * 0.3))
