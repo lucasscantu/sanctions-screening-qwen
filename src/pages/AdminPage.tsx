@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSyncStatus, getImportHistory, triggerSync, checkOllamaHealth } from '../api/client';
 import { RefreshCw, Clock, CheckCircle, XCircle, AlertCircle, Cpu, Database, Play } from 'lucide-react';
 import { useState } from 'react';
+import { ModelSelector } from '../components/ModelSelector';
 
 export function AdminPage() {
   const queryClient = useQueryClient();
@@ -48,6 +49,8 @@ export function AdminPage() {
           Manage data synchronization and system configuration
         </p>
       </div>
+
+      <ModelSelector />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
