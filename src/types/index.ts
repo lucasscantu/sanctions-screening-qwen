@@ -1,6 +1,6 @@
 export type RecordType = 'INDIVIDUAL' | 'ENTITY';
 
-export interface SanctionedRecord {
+export interface DataRecord {
   id: number;
   referenceNumber: string;
   recordType: RecordType;
@@ -13,7 +13,7 @@ export interface SanctionedRecord {
   sourceUrl: string;
   aliases: NameAlias[];
   biographicalDetails: BiographicalDetail[];
-  sanctionsPrograms: SanctionsProgram[];
+  programs: Program[];
 }
 
 export interface NameAlias {
@@ -41,7 +41,7 @@ export interface IdentificationDocument {
   expiryDate: string | null;
 }
 
-export interface SanctionsProgram {
+export interface Program {
   program: string;
   referenceInfo: string | null;
   listingDetails: string | null;
@@ -61,7 +61,7 @@ export interface ImportJob {
 }
 
 export interface SearchResult {
-  record: SanctionedRecord;
+  record: DataRecord;
   matchingAlias: string | null;
   deterministicScore: number;
   aiAnalysis: AIAnalysis | null;
